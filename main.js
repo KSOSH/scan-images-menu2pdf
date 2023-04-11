@@ -6,9 +6,10 @@ const fs = require('fs'),
 	compress_images = require('compress-images'),
 	dialog = require('node-file-dialog'),
 	{ PDFDocument } =  require('./modules/pdf-lib/pdf-lib.js'),
-	config = {type:'directory'};
+	config = {type:'directory'},
+	imagick = require('imagickal');
 
-var mapsFiles = [
+var filesOne = [
 		{
 			title: "Меню питания для 1-​4 классов",
 			sufix: "-1-4",
@@ -29,8 +30,96 @@ var mapsFiles = [
 			title: "Меню питания для детей мобилизованных родителей",
 			sufix: "-mob",
 		}
-	];
+	],
+	filesTen = [
+		{
+			title: "Примерное двухнедельное меню рациона питания для детей учащихся 1-​4 класса",
+			sufix: "-1-4",
+		},
+		{
+			title: "Примерное двухнедельное меню рациона питания для детей c ОВЗ",
+			sufix: "-ovz",
+		},
+		{
+			title: "Примерное двухнедельное индивидуальное меню рациона питания",
+			sufix: "-ind",
+		},
+		{
+			title: "Примерное двухнедельное меню рациона питания для учащихся",
+			sufix: "",
+		},
+		{
+			title: "Примерное двухнедельное меню рациона питания для детей мобилизованных родителей",
+			sufix: "-mob",
+		}
+	],
+	typeMenu = false,
+	mapsFiles;
 
+function openExplorerin(path, callback) {
+	var cmd = ``;
+	switch (require(`os`).platform().toLowerCase().replace(/[0-9]/g, ``).replace(`darwin`, `macos`)) {
+		case `win`:
+			path = path || '=';
+			path = path.replace(/\//g, `\\`);
+			path = path.replace(/\\$/, ``);
+			cmd = `explorer`;
+			break;
+		case `linux`:
+			path = path || '/';
+			cmd = `xdg-open`;
+			break;
+		case `macos`:
+			path = path || '/';
+			cmd = `open`;
+			break;
+	}
+	let p = require(`child_process`).spawn(cmd, [path]);
+	p.on('error', (err) => {
+		p.kill();
+		return callback(err);
+	});
+}
+
+function isDir(dir){
+	return new Promise(function(resolve, reject){
+		try {
+			let stats = fs.lstatSync(dir);
+			if (stats.isDirectory()) {
+				resolve(true);
+			}else{
+				resolve(false);
+			}
+		}catch (e) {
+			resolve(false);
+		}
+	});
+}
+
+function readDirectory(dir){
+	return new Promise(function(resolve, reject) {
+		let files = fs.readdirSync(dir).filter(function(fn) {
+				if(fn.endsWith('.jpg') || fn.endsWith('.jpeg') || fn.endsWith('.png') || fn.endsWith('.JPG') || fn.endsWith('.JPEG') || fn.endsWith('.PNG')){
+					return true;
+				}
+				return false;
+			});
+		resolve(files);
+	})
+}
+
+function resize(input, output, width) {
+	return new Promise(function(resolve, reject){
+		imagick.commands()
+			.resize({ width: width })
+			.quality(100)
+			.exec(input, output).then(function () {
+				resolve(output);
+			}).catch(function(err){
+				reject(output);
+			});
+	});
+}
 
 function compress(m, d) {
 	return new Promise(function(resolve, reject){
@@ -48,7 +137,7 @@ function compress(m, d) {
 			{
 				jpg: {
 					engine: "mozjpeg",
-					command: ["-quality", "60"]
+					command: ["-quality", "80"]
 				}
 			},
 			{
@@ -90,26 +179,22 @@ function pdfGenerator (outDir, imgs) {
 			fs.mkdirSync(outDir);
 		}
 		try {
-			var files = fs.readdirSync(imgs).filter(function(fn) {
-				if(fn.endsWith('.jpg') || fn.endsWith('.jpeg') || fn.endsWith('.png') || fn.endsWith('.JPG') || fn.endsWith('.JPEG') || fn.endsWith('.PNG')){
-					return true;
-				}
-				return false;
-			});
+			var files = await readDirectory(imgs);
 			if(files.length){
 				// Создать возможность переключения меню с обычного на 10-ти дневное
 				/**
 				 * created.
 				 */
-
+				mapsFiles = typeMenu ? filesTen : filesOne;
 				/**
 				 * done.
 				 */
 				let i = 0;
 				// Кол-во файлов в файле PDF
-				let c = 2;
+				// Зависит от типа меню
+				let c = typeMenu ? 11 : 2;
 				let k = 0;
-				// Количество типов меню
+				// Количество пунктов меню
 				let f = 5;
 				let pdfDoc;
 				/**
@@ -142,9 +227,9 @@ function pdfGenerator (outDir, imgs) {
 					/**
 					 * Масштабируем страницу
 					 * При сканировании страниц в формате 300dpi
-					 * Изображение нужно уменьшить до 27.44%
+					 * Изображение нужно уменьшить до 27.44%  0.2744
 					 */
-					let pdfDims = pdfImage.scale(0.2744);
+					let pdfDims = pdfImage.scale(0.7);
 					/**
 					 * Добавляем страницу по рамерам полученного изображения
 					 */
@@ -233,6 +318,7 @@ function pdfGenerator (outDir, imgs) {
 						i = 0;
 					}
 				}
+				openExplorerin(outDir, function(){});
 				resolve(String("Done create pdf`s files!").bold.yellow);
 			}else{
 				reject(String("Empty directory:").bold.red + " " + imgs);
@@ -242,76 +328,140 @@ function pdfGenerator (outDir, imgs) {
 		}
 	});
 }
-/**
- * Старт промпта
- * Нужна дата
- */
-var prompt = require('prompt');
-var schema = {
-	properties: {
-		date: {
-			pattern: /\d{4}-\d{2}-\d{2}$/,
-			message: 'Введите дату. Формат записи даты yyyy-mm-dd',
-			description: 'Введите дату. Формат записи даты yyyy-mm-dd',
-			type: 'string',
-			required: true
-		},
-	}
-};
-prompt.start();
+
+function promptDialog(tp) {
+	// tp == 0 - schema
+	// tp == 1 - types
+	return new Promise(function(resolve, reject){
+			let prompt = require('prompt'),
+			schema = {
+				properties: {
+					date: {
+						pattern: /\d{4}-\d{2}-\d{2}$/,
+						message: 'Введите дату. Формат записи даты yyyy-mm-dd',
+						description: 'Введите дату. Формат записи даты yyyy-mm-dd',
+						type: 'string',
+						required: true
+					},
+				}
+			},
+			types = {
+				properties: {
+					date: {
+						pattern: /\d{1,2}$/,
+						message: 'Тип меню. 1 - каждодневное, 2 - двухнедельное',
+						description: 'Тип меню. 1 - каждодневное, 2 - двухнедельное',
+						type: 'string',
+						required: true
+					},
+				}
+			},
+			schemas = tp ? types : schema;
+		prompt.start();
+		prompt.get(schemas, function(err, result){
+			if(err == null){
+				resolve(result.date);
+			}else{
+				reject(err);
+			}
+		});
+	});
+}
+
 /**
  * Запускаем промпт
  */
-prompt.get(schema, function(err, result){
-	if(err == null){
-		/**
-		 * Проверяем дату.
-		 * Если что ни так, уж извените...)))
-		 */
-		date = new Date(result.date);
-		let day = date.getDay();
-		if(day == 6){
-			day = 2
-		}else if(day == 0){
-			day = 1;
-		}else{
-			day = 0
-		}
-		date.setDate(date.getDate() + day);
-
-		console.log('Start date:'.cyan.bold + " " + date.toString());
+promptDialog(0).then(function(data){
+	/**
+	 * Проверяем дату.
+	 * Если что ни так, уж извените...)))
+	 */
+	date = new Date(data);
+	let day = date.getDay();
+	if(day == 6){
+		day = 2
+	}else if(day == 0){
+		day = 1;
+	}else{
+		day = 0
+	}
+	date.setDate(date.getDate() + day);
+	console.log('Start date:'.cyan.bold + " " + date.toString());
+	/**
+	 * Тип меню
+	 */
+	promptDialog(1).then(function(data){
 		/**
 		 * Выбор директории (диалоговое окно)
 		 */
-		dialog(config).then(function(direct){
+		typeMenu = data == 1 ? false : true;
+		dialog(config).then(async function(direct){
 			let dir = direct[0].replace(/\\/g, '/') + '/';
 			console.log(dir.cyan.bold);
-			if(fs.existsSync(dir)) {
-				const mask = `${dir}*.{jpg,png,jpeg,JPG,PNG,JPEG}`;
-				console.log("Start compressed images...".bold.cyan);
+			let is_dir = await isDir(dir);
+			if(is_dir) {
 				/**
-				 * Оптимизация изображений
+				 * Ресайз изображения
+				 * Каждодневное меню width = 1134
+				 * Десятидневное меню width = 1604
 				 */
-				compress(mask, dir).then(function(res){
-					console.log("Compressed images DONE!".bold.yellow);
-					let outPdf = dir + "pdf/",
-						imgs = dir + "png/";
+				readDirectory(dir).then(async function(images){
+					fs.rmSync(`${dir}pdf`, { recursive: true, force: true });
+					let resize_dir = `${dir}resize/`,
+						is_res_dir = await isDir(resize_dir);
+					if(!is_res_dir){
+						fs.mkdirSync(resize_dir);
+					}
+					for(let image of images){
+						let inputFile = `${dir}${image}`,
+							outputFile = `${resize_dir}${image}`;
+						console.log(`Resize ${inputFile} ...`.cyan.bold);
+						outputFile = await resize(inputFile, outputFile, typeMenu ? 1604 : 1134);
+						console.log("Resizeed image DONE!".bold.yellow);
+					}
+					
 					/**
-					 * Генерация PDF файлов
+					 * Оптимизация изображений
 					 */
-					pdfGenerator(outPdf, imgs).then(function(pdfs){
-						console.log(pdfs)
+					const mask = `${dir}resize/*.{jpg,png,jpeg,JPG,PNG,JPEG}`;
+					console.log("Start compressed images...".bold.cyan);
+					compress(mask, dir).then(function(res){
+						console.log("Compressed images DONE!".bold.yellow);
+						let outPdf = dir + "pdf/",
+							imgs = dir + "png/";
+						/**
+						 * Генерация PDF файлов
+						 */
+						pdfGenerator(outPdf, imgs).then(function(pdfs){
+							console.log(pdfs);
+							// clear
+							fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+							fs.rmSync(`${dir}png`, { recursive: true, force: true });
+						}).catch(function(err){
+							console.log("PDF Error!".bold.red);
+							console.log(err);
+							// clear
+							fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+							fs.rmSync(`${dir}png`, { recursive: true, force: true });
+						})
 					}).catch(function(err){
-						console.log("PDF Error!".bold.red);
-						console.log(err)
-					})
-				}).catch(function(err){
-					console.log("Compress Error!".bold.red);
-					console.log(err);
-				});
+						console.log("Compress Error!".bold.red);
+						console.log(err);
+						// clear
+						fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+						fs.rmSync(`${dir}png`, { recursive: true, force: true });
+					});
+				}).catch(function(){
+					console.log(`Empty directory: ${dir}`.bold.red);
+					// clear
+					fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+					fs.rmSync(`${dir}png`, { recursive: true, force: true });
+				})
 			}
 		}).catch(function(error){
 			console.log(error)
+			fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+			fs.rmSync(`${dir}png`, { recursive: true, force: true });
 		});
-	}
+	});
 });
