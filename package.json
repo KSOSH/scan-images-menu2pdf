@@ -12,9 +12,8 @@
 		"gifsicle": "^5.2.1",
 		"pngquant-bin": "^6.0.1",
 		"node-file-dialog": "^1.0.3",
-		"prompt": "^1.3.0"
-	},
-	"devDependencies": {
+		"prompt": "^1.3.0",
 		"compress-images": "^2.0.5"
-	}
+	},
+	"devDependencies": {}
 }
