@@ -133,7 +133,7 @@ function resize(input, output, width) {
 		});
 
 		ls.on('close', (code) => {
-			console.log(`ImageMagick process exited with code ${code}`.bold.cyan);
+			//console.log(`ImageMagick process exited with code ${code}`.bold.cyan);
 			if(code == 0){
 				resolve(output);
 			}else{
@@ -197,7 +197,8 @@ function pdfGenerator (outDir, imgs) {
 		/**
 		 * Если директория для PDF не существует - создать
 		 */
-		if(!fs.existsSync(outDir)){
+		let pdfDirs = await isDir(outDir);
+		if(!pdfDirs){
 			fs.mkdirSync(outDir);
 		}
 		try {
@@ -235,6 +236,7 @@ function pdfGenerator (outDir, imgs) {
 					 * Создаём PDF документ 
 					 */
 					if(i == 0){
+						console.log('Create PDF object...'.bold.cyan);
 						pdfDoc = await PDFDocument.create();
 					}
 					/**
@@ -282,13 +284,28 @@ function pdfGenerator (outDir, imgs) {
 						pdfDoc.setCreator('ГБОУ СОШ пос. Комсомольский');
 						pdfDoc.setProducer('ГБОУ СОШ пос. Комсомольский');
 						/**
+						 * Формируем имя файла
+						 * Формат: dd-mm-yyyy-sufix.pdf
+						 */
+						let d = date.getDate();
+						let m = date.getMonth() + 1;
+						let y = date.getFullYear();
+						let dd = d < 10 ? `0${d}` : d;
+						m = m < 10 ? `0${m}` : m;
+						let fdir = `${dd}.${m}.${y}`;
+						let pdfDir = await isDir(outDir + fdir +"/");
+						console.log(outDir + fdir +"/");
+						if(!pdfDir){
+							fs.mkdirSync(outDir + fdir +"/");
+						}
+						/**
 						 * Заголовок
 						 * Ключевые слова
 						 * Тема (Описание)
 						 */
-						pdfDoc.setTitle(mapsFiles[k].title);
-						pdfDoc.setKeywords([mapsFiles[k].title]);
-						pdfDoc.setSubject(mapsFiles[k].title);
+						pdfDoc.setTitle(mapsFiles[k].title + " на " + fdir);
+						pdfDoc.setKeywords([mapsFiles[k].title + " на " + fdir]);
+						pdfDoc.setSubject(mapsFiles[k].title + " на " + fdir);
 						/**
 						 * Время создания файла
 						 * Время модификации файла
@@ -299,21 +316,13 @@ function pdfGenerator (outDir, imgs) {
 						 * Сохраняем
 						 */
 						let pdfBytes = await pdfDoc.save();
-						/**
-						 * Формируем имя файла
-						 * Формат: dd-mm-yyyy-sufix.pdf
-						 */
-						let d = date.getDate();
-						let m = date.getMonth() + 1;
-						let y = date.getFullYear();
-						let dd = d < 10 ? `0${d}` : d;
-						m = m < 10 ? `0${m}` : m;
-						let pdfFile = `${dd}.${m}.${y}${mapsFiles[k].sufix}.pdf`;
+
+						let pdfFile = `${fdir}${mapsFiles[k].sufix}.pdf`;
 						/**
 						 * Пишем в файл
 						 */
-						fs.writeFileSync(outDir + pdfFile, pdfBytes);
-						console.log(String('Write file:').bold.cyan + " " + pdfFile);
+						fs.writeFileSync(outDir + fdir +"/" + pdfFile, pdfBytes);
+						console.log(String('Write file:').bold.cyan + " " + pdfFile + " DONE!".bold.yellow);
 						/**
 						 * Увеличиваем счётчик типов меню
 						 */
@@ -408,7 +417,7 @@ promptDialog(0).then(function(data){
 		day = 0
 	}
 	date.setDate(date.getDate() + day);
-	console.log('Start date:'.cyan.bold + " " + date.toString());
+	console.log(date.toString().cyan.bold);
 	/**
 	 * Тип меню
 	 */
@@ -419,7 +428,7 @@ promptDialog(0).then(function(data){
 		typeMenu = data == 1 ? false : true;
 		dialog(config).then(async function(direct){
 			let dir = direct[0].replace(/\\/g, '/') + '/';
-			console.log(dir.cyan.bold);
+
 			let is_dir = await isDir(dir);
 			if(is_dir) {
 				/**
@@ -429,27 +438,27 @@ promptDialog(0).then(function(data){
 				 */
 				readDirectory(dir).then(async function(images){
 					if(await isDir(`${dir}pdf`)){
+						console.log("Delete directory pdf".bold.yellow);
 						fs.rmSync(`${dir}pdf`, { recursive: true, force: true });
 					}
 					let resize_dir = `${dir}resize/`,
 						is_res_dir = await isDir(resize_dir);
 					if(!is_res_dir){
-						console.log('Create resize'.bold.yellow);
 						fs.mkdirSync(resize_dir);
 					}
 					for(let image of images){
 						let inputFile = `${dir}${image}`,
 							outputFile = `${resize_dir}${image}`;
-						console.log(`Resize ${inputFile} ...`.cyan.bold);
+						console.log(`    Read iamge:`.cyan.bold + ` ${inputFile} `);
 						await resize(inputFile, outputFile, typeMenu ? 1604 : 1134);
-						console.log(`Resizeed image ${outputFile} DONE!`.bold.yellow);
+						console.log(`Resizeed image:`.bold.cyan + ` ${outputFile} ` + `DONE!`.bold.yellow);
 					}
 					
 					/**
 					 * Оптимизация изображений
 					 */
 					const mask = `${dir}resize/*.{jpg,png,jpeg,JPG,PNG,JPEG}`;
-					console.log("Start compressed images...".bold.cyan);
+					console.log("Start compressed images...".bold.yellow);
 					compress(mask, dir).then(function(res){
 						console.log("Compressed images DONE!".bold.yellow);
 						let outPdf = dir + "pdf/",
@@ -457,36 +466,41 @@ promptDialog(0).then(function(data){
 						/**
 						 * Генерация PDF файлов
 						 */
-						pdfGenerator(outPdf, imgs).then(function(pdfs){
-							console.log(pdfs);
+						pdfGenerator(outPdf, imgs).then(function(str){
 							// clear
+							console.log(str);
 							fs.rmSync(`${dir}resize`, { recursive: true, force: true });
 							fs.rmSync(`${dir}png`, { recursive: true, force: true });
+							console.log("Delete directory`s resize && png".bold.yellow);
 						}).catch(function(err){
 							console.log("PDF Error!".bold.red);
 							console.log(err);
 							// clear
-							//fs.rmSync(`${dir}resize`, { recursive: true, force: true });
-							//fs.rmSync(`${dir}png`, { recursive: true, force: true });
+							fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+							fs.rmSync(`${dir}png`, { recursive: true, force: true });
+							console.log("Delete directory`s resize && png".bold.yellow);
 						})
 					}).catch(function(err){
 						console.log("Compress Error!".bold.red);
 						console.log(err);
 						// clear
-						//fs.rmSync(`${dir}resize`, { recursive: true, force: true });
-						//fs.rmSync(`${dir}png`, { recursive: true, force: true });
+						fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+						fs.rmSync(`${dir}png`, { recursive: true, force: true });
+						console.log("Delete directory`s resize && png".bold.yellow);
 					});
 				}).catch(function(){
 					console.log(`Error: ${dir}`.bold.red);
 					// clear
-					//fs.rmSync(`${dir}resize`, { recursive: true, force: true });
-					//fs.rmSync(`${dir}png`, { recursive: true, force: true });
+					fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+					fs.rmSync(`${dir}png`, { recursive: true, force: true });
+					console.log("Delete directory`s resize && png".bold.yellow);
 				})
 			}
 		}).catch(function(error){
 			console.log(error)
-			//fs.rmSync(`${dir}resize`, { recursive: true, force: true });
-			//fs.rmSync(`${dir}png`, { recursive: true, force: true });
+			fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+			fs.rmSync(`${dir}png`, { recursive: true, force: true });
+			console.log("Delete directory`s resize && png".bold.yellow);
 		});
 	});
 });
