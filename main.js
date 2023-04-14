@@ -4,10 +4,10 @@ const fs = require('fs'),
 	path = require('path'),
 	colors = require('colors'),
 	compress_images = require('compress-images'),
+	{ spawn } = require('child_process'),
 	dialog = require('node-file-dialog'),
 	{ PDFDocument } =  require('./modules/pdf-lib/pdf-lib.js'),
-	config = {type:'directory'},
-	imagick = require('imagickal');
+	config = {type:'directory'};
 
 var filesOne = [
 		{
@@ -110,14 +110,36 @@ function readDirectory(dir){
 
 function resize(input, output, width) {
 	return new Promise(function(resolve, reject){
-		imagick.commands()
-			.resize({ width: width })
-			.quality(100)
-			.exec(input, output).then(function () {
+		// magick convert "E:/scans/0001.jpg" -filter Catrom -resize 1134x -quality 100 "E:/scans/resize/0001.jpg"
+		let args = [
+			"convert",
+			input,
+			"-filter",
+			"Catrom",
+			"-resize",
+			`${width}x`,
+			"-quality",
+			"80",
+			output
+		];
+		const ls = spawn('magick', args);
+
+		ls.stdout.on('data', (data) => {
+			console.log(`stdout: ${data}`);
+		});
+
+		ls.stderr.on('data', (data) => {
+			console.error(`stderr: ${data}`);
+		});
+
+		ls.on('close', (code) => {
+			console.log(`ImageMagick process exited with code ${code}`.bold.cyan);
+			if(code == 0){
 				resolve(output);
-			}).catch(function(err){
-				reject(output);
-			});
+			}else{
+				reject(code);
+			}
+		});
 	});
 }
 
@@ -330,8 +352,8 @@ function pdfGenerator (outDir, imgs) {
 }
 
 function promptDialog(tp) {
-	// tp == 0 - schema
-	// tp == 1 - types
+	// tp == 0 - schema, ввод Даты
+	// tp == 1 - types, тип меню (каждодневное, двухнедельное)
 	return new Promise(function(resolve, reject){
 			let prompt = require('prompt'),
 			schema = {
@@ -406,18 +428,21 @@ promptDialog(0).then(function(data){
 				 * Десятидневное меню width = 1604
 				 */
 				readDirectory(dir).then(async function(images){
-					fs.rmSync(`${dir}pdf`, { recursive: true, force: true });
+					if(await isDir(`${dir}pdf`)){
+						fs.rmSync(`${dir}pdf`, { recursive: true, force: true });
+					}
 					let resize_dir = `${dir}resize/`,
 						is_res_dir = await isDir(resize_dir);
 					if(!is_res_dir){
+						console.log('Create resize'.bold.yellow);
 						fs.mkdirSync(resize_dir);
 					}
 					for(let image of images){
 						let inputFile = `${dir}${image}`,
 							outputFile = `${resize_dir}${image}`;
 						console.log(`Resize ${inputFile} ...`.cyan.bold);
-						outputFile = await resize(inputFile, outputFile, typeMenu ? 1604 : 1134);
-						console.log("Resizeed image DONE!".bold.yellow);
+						await resize(inputFile, outputFile, typeMenu ? 1604 : 1134);
+						console.log(`Resizeed image ${outputFile} DONE!`.bold.yellow);
 					}
 					
 					/**
@@ -441,27 +466,27 @@ promptDialog(0).then(function(data){
 							console.log("PDF Error!".bold.red);
 							console.log(err);
 							// clear
-							fs.rmSync(`${dir}resize`, { recursive: true, force: true });
-							fs.rmSync(`${dir}png`, { recursive: true, force: true });
+							//fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+							//fs.rmSync(`${dir}png`, { recursive: true, force: true });
 						})
 					}).catch(function(err){
 						console.log("Compress Error!".bold.red);
 						console.log(err);
 						// clear
-						fs.rmSync(`${dir}resize`, { recursive: true, force: true });
-						fs.rmSync(`${dir}png`, { recursive: true, force: true });
+						//fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+						//fs.rmSync(`${dir}png`, { recursive: true, force: true });
 					});
 				}).catch(function(){
-					console.log(`Empty directory: ${dir}`.bold.red);
+					console.log(`Error: ${dir}`.bold.red);
 					// clear
-					fs.rmSync(`${dir}resize`, { recursive: true, force: true });
-					fs.rmSync(`${dir}png`, { recursive: true, force: true });
+					//fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+					//fs.rmSync(`${dir}png`, { recursive: true, force: true });
 				})
 			}
 		}).catch(function(error){
 			console.log(error)
-			fs.rmSync(`${dir}resize`, { recursive: true, force: true });
-			fs.rmSync(`${dir}png`, { recursive: true, force: true });
+			//fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+			//fs.rmSync(`${dir}png`, { recursive: true, force: true });
 		});
 	});
 });

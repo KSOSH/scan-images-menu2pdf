@@ -7,11 +7,11 @@
 		"test": "node main.js"
 	},
 	"author": "",
-	"license": "ISC",
+	"license": "MIT",
 	"dependencies": {
+		"colors": "^1.4.0",
 		"compress-images": "^2.0.5",
 		"gifsicle": "^5.2.1",
-		"imagickal": "^5.0.1",
 		"node-file-dialog": "^1.0.3",
 		"pngquant-bin": "^6.0.1",
 		"prompt": "^1.3.0"
