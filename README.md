@@ -29,12 +29,24 @@ $ npm install
 ```Batchfile
 $ node index.js
 ```
+или
+```Batchfile
+$ npm run prod
+```
 ### Сборка проекта
 ```Batchfile
 $ minify main.js > index.js
+```
+или
+```Batchfile
+$ npm run build
 ```
 Должен быть установлен глобально пакет [**minify**](https://www.npmjs.com/package/minify)
 ### Тест проекта
 ```Batchfile
 $ node main.js
+```
+или
+```Batchfile
+$ npm run test
 ```
