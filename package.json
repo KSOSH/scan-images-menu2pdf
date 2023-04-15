@@ -1,12 +1,19 @@
 {
-	"name": "projectsoft",
+	"name": "scan-images-menu2pdf",
 	"version": "1.0.0",
 	"description": "",
-	"main": "main.js",
+	"main": "index.js",
 	"scripts": {
-		"test": "node main.js"
+		"test": "node main.js",
+		"build": "minify main.js > index.js",
+		"prod": "node index.js"
 	},
-	"author": "",
+	"files": [
+		"index.js",
+		"main.js",
+		"modules/**/*"
+	],
+	"author": "ProjectSoft <projectsoft2009@yandex.ru>",
 	"license": "MIT",
 	"dependencies": {
 		"colors": "^1.4.0",
