@@ -12,21 +12,21 @@
 Создание PDF файлов посредством библиотеки [**pdf-lib**](https://pdf-lib.js.org/)
 
 ### Установка:
-```
+```Batchfile
 $ git clone https://github.com/KSOSH/scan-images-menu2pdf.git
 $ cd scan-images-menu2pdf
 $ npm install
 ```
-### Запуск
+### BatchfileЗапуск
 ```
 $ node index.js
 ```
 ### Сборка проекта
-```
+```Batchfile
 $ minify main.js > index.js
 ```
 Должен быть установлен глобально пакет [**minify**](https://www.npmjs.com/package/minify)
 ### Тест проекта
-```
+```Batchfile
 $ node main.js
 ```
