@@ -25,8 +25,8 @@ $ git clone https://github.com/KSOSH/scan-images-menu2pdf.git
 $ cd scan-images-menu2pdf
 $ npm install
 ```
-### BatchfileЗапуск
-```
+### Запуск
+```Batchfile
 $ node index.js
 ```
 ### Сборка проекта
