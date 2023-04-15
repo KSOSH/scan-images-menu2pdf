@@ -8,6 +8,7 @@ const fs = require('fs'),
 	dialog = require('node-file-dialog'),
 	{ PDFDocument } =  require('./modules/pdf-lib/pdf-lib.js'),
 	config = {type:'directory'};
+let startTime, endTime;
 
 var filesOne = [
 		{
@@ -180,8 +181,10 @@ function compress(m, d) {
 					command: ["--colors", "64", "--use-col=web"]
 				}
 			},
-			function(err, completed){
+			function(err, completed, static){
+				console.log(`    Read iamge:`.cyan.bold + ` ${static.input} `);
 				if(!err){
+					console.log(`Compress image:`.bold.cyan + ` ${static.path_out_new} ` + `DONE!`.bold.yellow);
 					if(completed)
 						resolve(completed)
 				}else{
@@ -236,7 +239,7 @@ function pdfGenerator (outDir, imgs) {
 					 * Создаём PDF документ 
 					 */
 					if(i == 0){
-						console.log('Create PDF object...'.bold.cyan);
+						console.log('Create PDF document...'.bold.cyan);
 						pdfDoc = await PDFDocument.create();
 					}
 					/**
@@ -294,9 +297,9 @@ function pdfGenerator (outDir, imgs) {
 						m = m < 10 ? `0${m}` : m;
 						let fdir = `${dd}.${m}.${y}`;
 						let pdfDir = await isDir(outDir + fdir +"/");
-						console.log(outDir + fdir +"/");
 						if(!pdfDir){
 							fs.mkdirSync(outDir + fdir +"/");
+							console.log('Directory:'.bold.cyan + " " + (outDir + fdir +"/").bold.yellow);
 						}
 						/**
 						 * Заголовок
@@ -437,6 +440,7 @@ promptDialog(0).then(function(data){
 				 * Десятидневное меню width = 1604
 				 */
 				readDirectory(dir).then(async function(images){
+					startTime = new Date().getTime();
 					if(await isDir(`${dir}pdf`)){
 						console.log("Delete directory pdf".bold.yellow);
 						fs.rmSync(`${dir}pdf`, { recursive: true, force: true });
@@ -472,6 +476,11 @@ promptDialog(0).then(function(data){
 							fs.rmSync(`${dir}resize`, { recursive: true, force: true });
 							fs.rmSync(`${dir}png`, { recursive: true, force: true });
 							console.log("Delete directory`s resize && png".bold.yellow);
+							endTime = new Date().getTime();
+							let time = endTime - startTime;
+							time = parseFloat(time / 1000).toFixed(2);
+							console.log(" ");
+							console.log("Elapsed time in seconds:".bold.yellow + ' ' + time + "s");
 						}).catch(function(err){
 							console.log("PDF Error!".bold.red);
 							console.log(err);
