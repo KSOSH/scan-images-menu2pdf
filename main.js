@@ -7,12 +7,30 @@ const fs = require('fs'),
 	{ spawn } = require('child_process'),
 	dialog = require('node-file-dialog'),
 	{ PDFDocument } =  require('./modules/pdf-lib/pdf-lib.js'),
+	calendar =  require('./modules/calendar/calendar.js'),
 	config = {type:'directory'};
+/**
+ * Предупреждение
+ * Удалить, как решим...
+ */
+console.log(`
+                            НАПОМИНАЕМ`.red.bold +
+`
+                               ****`.yellow.bold +
+`
+  Приложение не поддерживает русские символы в выбранной директории!
+Убедительная просьба, все изображения разместить в директории, в пути
+               которой не импользуются русские символы.
+
+                      Приносим свои извенения.
+                        Мы над этим работаем.
+`.cyan.bold);
+
 let startTime, endTime;
 
 var filesOne = [
 		{
-			title: "Меню питания для 1-​4 классов",
+			title: "Меню питания для 1-4 классов",
 			sufix: "-1-4",
 		},
 		{
@@ -34,7 +52,7 @@ var filesOne = [
 	],
 	filesTen = [
 		{
-			title: "Примерное двухнедельное меню рациона питания для детей учащихся 1-​4 класса",
+			title: "Примерное двухнедельное меню рациона питания для детей учащихся 1-4 класса",
 			sufix: "-1-4",
 		},
 		{
@@ -57,35 +75,35 @@ var filesOne = [
 	typeMenu = false,
 	mapsFiles;
 
-function openExplorerin(path, callback) {
+function openExplorerin(paths, callback) {
 	var cmd = ``;
 	switch (require(`os`).platform().toLowerCase().replace(/[0-9]/g, ``).replace(`darwin`, `macos`)) {
 		case `win`:
-			path = path || '=';
-			path = path.replace(/\//g, `\\`);
-			path = path.replace(/\\$/, ``);
+			paths = paths || '=';
+			paths = paths.replace(/\//g, `\\`);
+			paths = paths.replace(/\\$/, ``);
 			cmd = `explorer`;
 			break;
 		case `linux`:
-			path = path || '/';
+			paths = paths || '/';
 			cmd = `xdg-open`;
 			break;
 		case `macos`:
-			path = path || '/';
+			paths = paths || '/';
 			cmd = `open`;
 			break;
 	}
-	let p = require(`child_process`).spawn(cmd, [path]);
+	let p = require(`child_process`).spawn(cmd, [paths]);
 	p.on('error', (err) => {
 		p.kill();
 		return callback(err);
 	});
 }
 
-function isDir(dir){
+function isDir(dir_read){
 	return new Promise(function(resolve, reject){
 		try {
-			let stats = fs.lstatSync(dir);
+			let stats = fs.lstatSync(dir_read);
 			if (stats.isDirectory()) {
 				resolve(true);
 			}else{
@@ -97,9 +115,9 @@ function isDir(dir){
 	});
 }
 
-function readDirectory(dir){
+function readDirectory(dir_read){
 	return new Promise(function(resolve, reject) {
-		let files = fs.readdirSync(dir).filter(function(fn) {
+		let files = fs.readdirSync(dir_read).filter(function(fn) {
 				if(fn.endsWith('.jpg') || fn.endsWith('.jpeg') || fn.endsWith('.png') || fn.endsWith('.JPG') || fn.endsWith('.JPEG') || fn.endsWith('.PNG')){
 					return true;
 				}
@@ -401,11 +419,15 @@ function promptDialog(tp) {
 		});
 	});
 }
-
+let dir = "";
 /**
  * Запускаем промпт
  */
-promptDialog(0).then(function(data){
+calendar().then(function(data){
+	if(data == ''){
+		console.log("Вы не указали дату".red.bold);
+		return;
+	}
 	/**
 	 * Проверяем дату.
 	 * Если что ни так, уж извените...)))
@@ -420,17 +442,17 @@ promptDialog(0).then(function(data){
 		day = 0
 	}
 	date.setDate(date.getDate() + day);
-	console.log(date.toString().cyan.bold);
 	/**
 	 * Тип меню
 	 */
-	promptDialog(1).then(function(data){
+	promptDialog(1).then(async function(data){
 		/**
 		 * Выбор директории (диалоговое окно)
 		 */
 		typeMenu = data == 1 ? false : true;
 		dialog(config).then(async function(direct){
-			let dir = direct[0].replace(/\\/g, '/') + '/';
+			dir = path.normalize(direct[0]);
+			dir = dir.replace(/\\/g, '/') + '/';
 
 			let is_dir = await isDir(dir);
 			if(is_dir) {
@@ -513,3 +535,6 @@ promptDialog(0).then(function(data){
 		});
 	});
 });
+function log(arg){
+	console.log("LOG: ".yellow.bold + String(arg).cyan.bold);
+}
