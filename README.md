@@ -15,7 +15,7 @@
 Файл для правки [menu.json](https://github.com/KSOSH/scan-images-menu2pdf/blob/main/menu.json).   
 Формат данных в JSON:  
 <details>
-	<summary>Формат данных в JSON</summary>
+	<summary><u><strong>Формат данных в JSON</strong>s</u></summary>
 
 ```json
 [
