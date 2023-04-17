@@ -6,7 +6,7 @@ except ImportError:
 	import ttk
 
 import time
-from tkcalendar import Calendar, DateEntry
+from tkcalendar import Calendar
 from tkinter import *
 
 if __name__ == '__main__':

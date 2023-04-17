@@ -4,11 +4,14 @@ const fs = require('fs'),
 	path = require('path'),
 	colors = require('colors'),
 	compress_images = require('compress-images'),
-	{ spawn } = require('child_process'),
+	{ spawn, exec } = require('child_process'),
 	dialog = require('node-file-dialog'),
 	{ PDFDocument } =  require('./modules/pdf-lib/pdf-lib.js'),
 	calendar =  require('./modules/calendar/calendar.js'),
-	config = {type:'directory'};
+	typemenu = require('./modules/typemenu/typemenu.js'),
+	config = {type:'directory'}
+	json = fs.readFileSync('menu.json'),
+	jsonPars = JSON.parse(json);
 /**
  * Предупреждение
  * Удалить, как решим...
@@ -26,54 +29,10 @@ console.log(`
                         Мы над этим работаем.
 `.cyan.bold);
 
-let startTime, endTime;
-
-var filesOne = [
-		{
-			title: "Меню питания для 1-4 классов",
-			sufix: "-1-4",
-		},
-		{
-			title: "Меню питания для учащихся с ОВЗ",
-			sufix: "-ovz",
-		},
-		{
-			title: "Индивидуальное меню питания",
-			sufix: "-ind",
-		},
-		{
-			title: "Меню питания для школьников",
-			sufix: "",
-		},
-		{
-			title: "Меню питания для детей мобилизованных родителей",
-			sufix: "-mob",
-		}
-	],
-	filesTen = [
-		{
-			title: "Примерное двухнедельное меню рациона питания для детей учащихся 1-4 класса",
-			sufix: "-1-4",
-		},
-		{
-			title: "Примерное двухнедельное меню рациона питания для детей c ОВЗ",
-			sufix: "-ovz",
-		},
-		{
-			title: "Примерное двухнедельное индивидуальное меню рациона питания",
-			sufix: "-ind",
-		},
-		{
-			title: "Примерное двухнедельное меню рациона питания для учащихся",
-			sufix: "",
-		},
-		{
-			title: "Примерное двухнедельное меню рациона питания для детей мобилизованных родителей",
-			sufix: "-mob",
-		}
-	],
+let startTime, endTime, dir = '',
 	typeMenu = false,
 	mapsFiles;
+
 
 function openExplorerin(paths, callback) {
 	var cmd = ``;
@@ -229,14 +188,14 @@ function pdfGenerator (outDir, imgs) {
 				/**
 				 * created.
 				 */
-				mapsFiles = typeMenu ? filesTen : filesOne;
+				mapsFiles = jsonPars[typeMenu]["items"];
 				/**
 				 * done.
 				 */
 				let i = 0;
 				// Кол-во файлов в файле PDF
 				// Зависит от типа меню
-				let c = typeMenu ? 11 : 2;
+				let c = jsonPars[typeMenu]["files"];
 				let k = 0;
 				// Количество пунктов меню
 				let f = 5;
@@ -381,36 +340,12 @@ function pdfGenerator (outDir, imgs) {
 	});
 }
 
-function promptDialog(tp) {
-	return new Promise(function(resolve, reject){
-			let prompt = require('prompt'),
-			types = {
-				properties: {
-					date: {
-						pattern: /\d{1,2}$/,
-						message: 'Тип меню. 1 - каждодневное, 2 - двухнедельное',
-						description: 'Тип меню. 1 - каждодневное, 2 - двухнедельное',
-						type: 'string',
-						required: true
-					},
-				}
-			},
-			schemas = types;
-		prompt.start();
-		prompt.get(schemas, function(err, result){
-			if(err == null){
-				resolve(result.date);
-			}else{
-				reject(err);
-			}
-		});
-	});
-}
-let dir = "";
 /**
- * Запускаем промпт
+ * Запускаем
+ * 
+ * Выбор даты
  */
-calendar().then(function(data){
+calendar().then(async function(data){
 	if(data == ''){
 		console.log("Вы не указали дату".red.bold);
 		return;
@@ -432,11 +367,12 @@ calendar().then(function(data){
 	/**
 	 * Тип меню
 	 */
-	promptDialog(1).then(async function(data){
+	typemenu(json).then(async function(data){
+
+		typeMenu = parseInt(data);
 		/**
 		 * Выбор директории (диалоговое окно)
 		 */
-		typeMenu = data == 1 ? false : true;
 		dialog(config).then(async function(direct){
 			dir = path.normalize(direct[0]);
 			dir = dir.replace(/\\/g, '/') + '/';
@@ -463,7 +399,7 @@ calendar().then(function(data){
 						let inputFile = `${dir}${image}`,
 							outputFile = `${resize_dir}${image}`;
 						console.log(`Чтение изображения:`.cyan.bold + ` ${inputFile} `);
-						await resize(inputFile, outputFile, typeMenu ? 1604 : 1134);
+						await resize(inputFile, outputFile, jsonPars[typeMenu]["size"]);
 						console.log(`Ресайз изображения:`.bold.cyan + ` ${outputFile} ` + `УСПЕШНО!`.bold.yellow);
 					}
 					
