@@ -11,31 +11,12 @@
 ### Описание
 Обробатывается два типа меню. Каждодневное и Двухнедельное.
 
-Каждодневное меню одного файла включает в себя два файла изображений. Двухнедельное состоит из одиннадцати файлов изображений. Править можно под себя. 
-Файл для правки [menu.json](https://github.com/KSOSH/scan-images-menu2pdf/blob/main/menu.json). 
-Формат данных в JSON:
-<details>
-
-  <summary>Spoiler warning</summary>
-
-  
-
-  Spoiler text. Note that it's important to have a space after the summary tag. You should be able to write any markdown you want inside the `<details>` tag... just make sure you close `<details>` afterward.
-
-  
-
-  ```javascript
-
-  console.log("I'm a code block!");
-
-  ```
-
-  
-
-</details>
+Каждодневное меню одного файла включает в себя два файла изображений. Двухнедельное состоит из одиннадцати файлов изображений. Править можно под себя.   
+Файл для правки [menu.json](https://github.com/KSOSH/scan-images-menu2pdf/blob/main/menu.json).   
+Формат данных в JSON:  
 <details>
 	<summary>Формат данных в JSON</summary>
-	
+
 ```json
 [
 	{
