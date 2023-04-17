@@ -260,9 +260,9 @@ function pdfGenerator (outDir, imgs) {
 						 * Создатель
 						 * Продюсер
 						 */
-						pdfDoc.setAuthor('ГБОУ СОШ пос. Комсомольский');
-						pdfDoc.setCreator('ГБОУ СОШ пос. Комсомольский');
-						pdfDoc.setProducer('ГБОУ СОШ пос. Комсомольский');
+						pdfDoc.setAuthor(jsonPars[typeMenu]["creator"]);
+						pdfDoc.setCreator(jsonPars[typeMenu]["creator"]);
+						pdfDoc.setProducer(jsonPars[typeMenu]["creator"]);
 						/**
 						 * Формируем имя файла
 						 * Формат: dd-mm-yyyy-sufix.pdf
@@ -427,13 +427,15 @@ calendar().then(async function(data){
 							time = parseFloat(time / 1000).toFixed(2);
 							console.log(" ");
 							console.log("Затраченное время в секундах:".bold.yellow + ' ' + time + "s");
+							console.log(" ");
 						}).catch(function(err){
 							console.log("Ошибка при генерации PDF!".bold.red);
 							console.log(err);
 							// clear
 							fs.rmSync(`${dir}resize`, { recursive: true, force: true });
 							fs.rmSync(`${dir}png`, { recursive: true, force: true });
-							console.log("даление директорий с оптимизированными изображениями...".bold.yellow);
+							console.log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
+							console.log(" ");
 						})
 					}).catch(function(err){
 						console.log("Ошибка оптимизации изображений!".bold.red);
@@ -442,20 +444,25 @@ calendar().then(async function(data){
 						console.log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
 						fs.rmSync(`${dir}resize`, { recursive: true, force: true });
 						fs.rmSync(`${dir}png`, { recursive: true, force: true });
+						console.log(" ");
 					});
-				}).catch(function(){
+				}).catch(function(err){
 					console.log(`Ошибка!: ${dir}`.bold.red);
+					console.log(err);
 					// clear
 					console.log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
 					fs.rmSync(`${dir}resize`, { recursive: true, force: true });
 					fs.rmSync(`${dir}png`, { recursive: true, force: true });
+					console.log(" ");
 				})
 			}
-		}).catch(function(error){
-			console.log(error)
+		}).catch(function(err){
+			console.log(`Ошибка!: ${dir}`.bold.red);
+			console.log(err);
 			console.log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
 			fs.rmSync(`${dir}resize`, { recursive: true, force: true });
 			fs.rmSync(`${dir}png`, { recursive: true, force: true });
+			console.log(" ");
 		});
 	});
 });
