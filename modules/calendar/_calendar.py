@@ -7,7 +7,7 @@ except ImportError:
 
 import time
 from tkcalendar import Calendar, DateEntry
-
+from tkinter import *
 
 if __name__ == '__main__':
 	def center(win):
@@ -43,7 +43,6 @@ if __name__ == '__main__':
 			top,
 			font="Arial 14",
 			selectmode='day',
-			cursor="hand1",
 			year=tmr.tm_year,
 			month=tmr.tm_mon,
 			day=tmr.tm_mday,
@@ -58,6 +57,9 @@ if __name__ == '__main__':
 			text="ok",
 			command=print_sel
 		).pack()
+		# p1 = PhotoImage(file = 'favicon.png')
+		# Setting icon of master window
+		# root.iconphoto(False, p1)
 	ccal = CalendarFn(root)
 	root.resizable(0, 0)
 	center(root)

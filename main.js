@@ -200,9 +200,9 @@ function compress(m, d) {
 				}
 			},
 			function(err, completed, static){
-				console.log(`    Read iamge:`.cyan.bold + ` ${static.input} `);
+					console.log(`Чтение изображения:`.cyan.bold + ` ${static.input} `);
 				if(!err){
-					console.log(`Compress image:`.bold.cyan + ` ${static.path_out_new} ` + `DONE!`.bold.yellow);
+					console.log(`Сжатие изображения:`.bold.cyan + ` ${static.path_out_new} ` + `УСПЕШНО!`.bold.yellow);
 					if(completed)
 						resolve(completed)
 				}else{
@@ -257,7 +257,7 @@ function pdfGenerator (outDir, imgs) {
 					 * Создаём PDF документ 
 					 */
 					if(i == 0){
-						console.log('Create PDF document...'.bold.cyan);
+						console.log('Создаём PDF документ...'.bold.cyan);
 						pdfDoc = await PDFDocument.create();
 					}
 					/**
@@ -317,7 +317,7 @@ function pdfGenerator (outDir, imgs) {
 						let pdfDir = await isDir(outDir + fdir +"/");
 						if(!pdfDir){
 							fs.mkdirSync(outDir + fdir +"/");
-							console.log('Directory:'.bold.cyan + " " + (outDir + fdir +"/").bold.yellow);
+							console.log('Директория создана:'.bold.cyan + " " + (outDir + fdir +"/").bold.yellow);
 						}
 						/**
 						 * Заголовок
@@ -343,7 +343,7 @@ function pdfGenerator (outDir, imgs) {
 						 * Пишем в файл
 						 */
 						fs.writeFileSync(outDir + fdir +"/" + pdfFile, pdfBytes);
-						console.log(String('Write file:').bold.cyan + " " + pdfFile + " DONE!".bold.yellow);
+						console.log(String('     Запись в файл:').bold.cyan + " " + pdfFile + " УСПЕШНО!".bold.yellow);
 						/**
 						 * Увеличиваем счётчик типов меню
 						 */
@@ -371,9 +371,9 @@ function pdfGenerator (outDir, imgs) {
 					}
 				}
 				openExplorerin(outDir, function(){});
-				resolve(String("Done create pdf`s files!").bold.yellow);
+				resolve(String("\nВсе PDF файлы созданы!\n").bold.yellow);
 			}else{
-				reject(String("Empty directory:").bold.red + " " + imgs);
+				reject(String("Директория пустая:").bold.red + " " + imgs);
 			}
 		}catch(e){
 			reject(e);
@@ -382,21 +382,8 @@ function pdfGenerator (outDir, imgs) {
 }
 
 function promptDialog(tp) {
-	// tp == 0 - schema, ввод Даты
-	// tp == 1 - types, тип меню (каждодневное, двухнедельное)
 	return new Promise(function(resolve, reject){
 			let prompt = require('prompt'),
-			schema = {
-				properties: {
-					date: {
-						pattern: /\d{4}-\d{2}-\d{2}$/,
-						message: 'Введите дату. Формат записи даты yyyy-mm-dd',
-						description: 'Введите дату. Формат записи даты yyyy-mm-dd',
-						type: 'string',
-						required: true
-					},
-				}
-			},
 			types = {
 				properties: {
 					date: {
@@ -408,7 +395,7 @@ function promptDialog(tp) {
 					},
 				}
 			},
-			schemas = tp ? types : schema;
+			schemas = types;
 		prompt.start();
 		prompt.get(schemas, function(err, result){
 			if(err == null){
@@ -464,7 +451,7 @@ calendar().then(function(data){
 				readDirectory(dir).then(async function(images){
 					startTime = new Date().getTime();
 					if(await isDir(`${dir}pdf`)){
-						console.log("Delete directory pdf".bold.yellow);
+						console.log("Удаляем директорию с PDF файлами".bold.yellow);
 						fs.rmSync(`${dir}pdf`, { recursive: true, force: true });
 					}
 					let resize_dir = `${dir}resize/`,
@@ -475,18 +462,18 @@ calendar().then(function(data){
 					for(let image of images){
 						let inputFile = `${dir}${image}`,
 							outputFile = `${resize_dir}${image}`;
-						console.log(`    Read iamge:`.cyan.bold + ` ${inputFile} `);
+						console.log(`Чтение изображения:`.cyan.bold + ` ${inputFile} `);
 						await resize(inputFile, outputFile, typeMenu ? 1604 : 1134);
-						console.log(`Resizeed image:`.bold.cyan + ` ${outputFile} ` + `DONE!`.bold.yellow);
+						console.log(`Ресайз изображения:`.bold.cyan + ` ${outputFile} ` + `УСПЕШНО!`.bold.yellow);
 					}
 					
 					/**
 					 * Оптимизация изображений
 					 */
 					const mask = `${dir}resize/*.{jpg,png,jpeg,JPG,PNG,JPEG}`;
-					console.log("Start compressed images...".bold.yellow);
+					console.log("Старт оптимизации изображений...".bold.yellow);
 					compress(mask, dir).then(function(res){
-						console.log("Compressed images DONE!".bold.yellow);
+						console.log("Все изображения оптимизированы!".bold.yellow);
 						let outPdf = dir + "pdf/",
 							imgs = dir + "png/";
 						/**
@@ -495,46 +482,44 @@ calendar().then(function(data){
 						pdfGenerator(outPdf, imgs).then(function(str){
 							// clear
 							console.log(str);
+							console.log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
+
 							fs.rmSync(`${dir}resize`, { recursive: true, force: true });
 							fs.rmSync(`${dir}png`, { recursive: true, force: true });
-							console.log("Delete directory`s resize && png".bold.yellow);
 							endTime = new Date().getTime();
 							let time = endTime - startTime;
 							time = parseFloat(time / 1000).toFixed(2);
 							console.log(" ");
-							console.log("Elapsed time in seconds:".bold.yellow + ' ' + time + "s");
+							console.log("Затраченное время в секундах:".bold.yellow + ' ' + time + "s");
 						}).catch(function(err){
-							console.log("PDF Error!".bold.red);
+							console.log("Ошибка при генерации PDF!".bold.red);
 							console.log(err);
 							// clear
 							fs.rmSync(`${dir}resize`, { recursive: true, force: true });
 							fs.rmSync(`${dir}png`, { recursive: true, force: true });
-							console.log("Delete directory`s resize && png".bold.yellow);
+							console.log("даление директорий с оптимизированными изображениями...".bold.yellow);
 						})
 					}).catch(function(err){
-						console.log("Compress Error!".bold.red);
+						console.log("Ошибка оптимизации изображений!".bold.red);
 						console.log(err);
 						// clear
+						console.log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
 						fs.rmSync(`${dir}resize`, { recursive: true, force: true });
 						fs.rmSync(`${dir}png`, { recursive: true, force: true });
-						console.log("Delete directory`s resize && png".bold.yellow);
 					});
 				}).catch(function(){
-					console.log(`Error: ${dir}`.bold.red);
+					console.log(`Ошибка!: ${dir}`.bold.red);
 					// clear
+					console.log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
 					fs.rmSync(`${dir}resize`, { recursive: true, force: true });
 					fs.rmSync(`${dir}png`, { recursive: true, force: true });
-					console.log("Delete directory`s resize && png".bold.yellow);
 				})
 			}
 		}).catch(function(error){
 			console.log(error)
+			console.log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
 			fs.rmSync(`${dir}resize`, { recursive: true, force: true });
 			fs.rmSync(`${dir}png`, { recursive: true, force: true });
-			console.log("Delete directory`s resize && png".bold.yellow);
 		});
 	});
 });
-function log(arg){
-	console.log("LOG: ".yellow.bold + String(arg).cyan.bold);
-}

@@ -11,3 +11,6 @@ node_modules/
 
 # Sublime
 *.sublime-workspace
+
+**/*.sh
+**/*.txt
