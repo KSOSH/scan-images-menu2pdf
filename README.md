@@ -76,16 +76,16 @@
 
 Обязательная установка Python не ниже версии 3.10.11 глобально для всех пользователей.
 
-##### Так же установить в Python:
+#### Так же установить в Python:
 Tkinter (если его нет)
 ```Batchfile
-pip install tk
+$ pip install tk
 ```
 tkcalendar
 ```Batchfile
-pip install tkcalendar
+$ pip install tkcalendar
 ```
-
+### Дополнительные установки
 Подключена обработка отсканированных изображений (ресайз) с помощю [**ImageMagick**](https://imagemagick.org/script/download.php) (скачать и установить от имени Администратора, проверить запуск magick)
 
 Обработка оптимизации изображений осуществляется модулем [**compress-images**](https://github.com/semiromid/compress-images)
