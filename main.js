@@ -366,7 +366,9 @@ calendar().then(async function(data){
 	/**
 	 * Тип меню
 	 */
-	typemenu(json).then(async function(data){
+	//let jsonArg = JSON.stringify(jsonPars);
+	// python = json
+	typemenu(jsonPars).then(async function(data){
 
 		typeMenu = parseInt(data);
 		/**

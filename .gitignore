@@ -1,3 +1,7 @@
+# Builds
+build/
+# Tests
+test/
 # Logs
 logs
 *.log
@@ -14,3 +18,4 @@ node_modules/
 
 **/*.sh
 **/*.txt
+*.spec
