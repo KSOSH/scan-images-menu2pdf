@@ -117,14 +117,14 @@ $ node main.js
 ```
 ## Этапы работы программы
 
-![Выбор даты](/KSOSH/scan-images-menu2pdf/blob/main/assets/screenshots/0001.png?raw=true "Выбор даты")
+![Выбор даты](/assets/screenshots/0001.png?raw=true "Выбор даты")
 
-![Определение типа меню](/KSOSH/scan-images-menu2pdf/blob/main/assets/screenshots/0002.png?raw=true "Определение типа меню")
+![Определение типа меню](/assets/screenshots/0002.png?raw=true "Определение типа меню")
 
-![Выбор папки с изображениями](/KSOSH/scan-images-menu2pdf/blob/main/assets/screenshots/0003.png?raw=true "Выбор папки с изображениями")
+![Выбор папки с изображениями](/assets/screenshots/0003.png?raw=true "Выбор папки с изображениями")
 
-![Старт программы](/KSOSH/scan-images-menu2pdf/blob/main/assets/screenshots/0004.png?raw=true "Старт программы")
+![Старт программы](/assets/screenshots/0004.png?raw=true "Старт программы")
 
-![Выполнение программы](/KSOSH/scan-images-menu2pdf/blob/main/assets/screenshots/0005.png?raw=true "Выполнение программы")
+![Выполнение программы](/assets/screenshots/0005.png?raw=true "Выполнение программы")
 
-![Дирректория с полученными PDF файлами](/KSOSH/scan-images-menu2pdf/blob/main/assets/screenshots/0006.png?raw=true "Дирректория с полученными PDF файлами")
+![Дирректория с полученными PDF файлами](/assets/screenshots/0006.png?raw=true "Дирректория с полученными PDF файлами")
