@@ -9,7 +9,7 @@ const fs = require('fs'),
 	{ PDFDocument } =  require('./modules/pdf-lib/pdf-lib.js'),
 	calendar =  require('./modules/calendar/calendar.js'),
 	typemenu = require('./modules/typemenu/typemenu.js'),
-	config = {type:'directory'}
+	config = {type:'directory'},
 	json = fs.readFileSync('menu.json'),
 	jsonPars = JSON.parse(json);
 /**
@@ -111,7 +111,6 @@ function resize(input, output, width) {
 		});
 
 		ls.on('close', (code) => {
-			//console.log(`ImageMagick process exited with code ${code}`.bold.cyan);
 			if(code == 0){
 				resolve(output);
 			}else{
