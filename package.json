@@ -7,9 +7,9 @@
 		"test": "node main.js",
 		"build": "minify main.js > index.js",
 		"prod": "node index.js",
-		"pycaleydar": "pyinstaller --specpath ./test --name calendar --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/calendar/dist modules/calendar/_calendar.py",
-		"pymenu": "pyinstaller --specpath ./test --name typemenu --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/typemenu/dist modules/typemenu/typemenu.py",
-		"python": "pyinstaller --specpath ./test --name calendar --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/calendar/dist modules/calendar/_calendar.py && pyinstaller --specpath ./test --name typemenu --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/typemenu/dist modules/typemenu/typemenu.py && rmdir test /s /q && rmdir build /s /q"
+		"pycaleydar": "pyinstaller --icon ./favicon.ico --specpath ./test --name calendar --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/calendar/dists modules/calendar/_calendar.py && rmdir test /s /q && rmdir build /s /q",
+		"pymenu": "pyinstaller --icon ../favicon.ico --specpath ./test --name typemenu --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/typemenu/dists modules/typemenu/typemenu.py && rmdir test /s /q && rmdir build /s /q",
+		"python": "pyinstaller --icon ../favicon.ico --specpath ./test --name calendar --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/calendar/dists modules/calendar/_calendar.py && pyinstaller --icon ../favicon.ico --specpath ./test --name typemenu --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/typemenu/dists modules/typemenu/typemenu.py && rmdir test /s /q && rmdir build /s /q"
 	},
 	"files": [
 		"index.js",

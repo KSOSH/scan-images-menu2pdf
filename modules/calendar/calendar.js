@@ -8,7 +8,7 @@ function calendar() {
 		 * Под Linux будут другие пути и команды
 		 */
 		// Windows exe
-		const bat = exec(path.join(root, 'dist/calendar.exe'), (error, stdout, stderr) => {
+		const bat = exec(path.join(root, 'dists/calendar.exe'), (error, stdout, stderr) => {
 			console.log('Calendar', stdout)
 			if (stdout) {
 				if (!stdout.trim())
