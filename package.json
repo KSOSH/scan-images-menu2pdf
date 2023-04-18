@@ -11,6 +11,7 @@
 	"files": [
 		"index.js",
 		"main.js",
+		"menu.json",
 		"modules/**/*"
 	],
 	"author": "ProjectSoft <projectsoft2009@yandex.ru>",
