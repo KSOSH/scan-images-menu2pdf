@@ -198,7 +198,7 @@ function pdfGenerator (outDir, imgs) {
 				let c = jsonPars[typeMenu]["files"];
 				let k = 0;
 				// Количество пунктов меню
-				let f = 5;
+				let f = mapsFiles.length;
 				let pdfDoc;
 				/**
 				 * Бежим по файлам
