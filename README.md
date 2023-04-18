@@ -75,6 +75,7 @@
 ]
 ```
 </details>
+
 Согласно JSON данных можно добавить ещё типы меню не правя код самого модуля, а правя только код файла `menu.json`. Внимательно следите за форматом JSON файла!!!
 
 Обязательная установка Python не ниже версии 3.10.11 глобально для всех пользователей.
@@ -114,3 +115,16 @@ $ minify main.js > index.js
 ```Batchfile
 $ node main.js
 ```
+## Этапы работы программы
+
+![Выбор даты](/KSOSH/scan-images-menu2pdf/blob/main/assets/screenshots/0001.png?raw=true "Выбор даты")
+
+![Определение типа меню](/KSOSH/scan-images-menu2pdf/blob/main/assets/screenshots/0002.png?raw=true "Определение типа меню")
+
+![Выбор папки с изображениями](/KSOSH/scan-images-menu2pdf/blob/main/assets/screenshots/0003.png?raw=true "Выбор папки с изображениями")
+
+![Старт программы](/KSOSH/scan-images-menu2pdf/blob/main/assets/screenshots/0004.png?raw=true "Старт программы")
+
+![Выполнение программы](/KSOSH/scan-images-menu2pdf/blob/main/assets/screenshots/0005.png?raw=true "Выполнение программы")
+
+![Дирректория с полученными PDF файлами](/KSOSH/scan-images-menu2pdf/blob/main/assets/screenshots/0006.png?raw=true "Дирректория с полученными PDF файлами")
