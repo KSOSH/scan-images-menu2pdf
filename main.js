@@ -5,13 +5,18 @@ const fs = require('fs'),
 	colors = require('colors'),
 	compress_images = require('compress-images'),
 	{ spawn, exec } = require('child_process'),
-	dialog = require('node-file-dialog'),
 	{ PDFDocument } =  require('./modules/pdf-lib/pdf-lib.js'),
 	calendar =  require('./modules/calendar/calendar.js'),
 	typemenu = require('./modules/typemenu/typemenu.js'),
-	config = {type:'directory'},
+	dialog = require('./modules/opendialog/opendialog.js'),
 	json = fs.readFileSync('menu.json'),
 	jsonPars = JSON.parse(json);
+
+let jsonType = [];
+for(let jsn of jsonPars){
+	jsonType.push({"name": jsn["name"]})
+}
+
 /**
  * Предупреждение
  * Удалить, как решим...
@@ -265,7 +270,8 @@ function pdfGenerator (outDir, imgs) {
 						 */
 						pdfDoc.setAuthor(jsonPars[typeMenu]["author"]);
 						/**
-						 * Кто производит документ
+						 * Кто создаёт документ
+						 * Проще говоря - это школа и т. п.
 						 */
 						pdfDoc.setProducer(jsonPars[typeMenu]["produser"]);
 						/**
@@ -276,28 +282,31 @@ function pdfGenerator (outDir, imgs) {
 						 */
 						pdfDoc.setCreator("https://github.com/Hopding/pdf-lib https://github.com/KSOSH/scan-images-menu2pdf");
 						/**
-						 * Формируем имя файла
-						 * Формат: dd-mm-yyyy-sufix.pdf
+						 * Формируем маску имени файла и директории файла
+						 * Формат: dd-mm-yyyy
 						 */
 						let d = date.getDate();
 						let m = date.getMonth() + 1;
 						let y = date.getFullYear();
 						let dd = d < 10 ? `0${d}` : d;
 						m = m < 10 ? `0${m}` : m;
-						let fdir = `${dd}.${m}.${y}`;
-						let pdfDir = await isDir(outDir + fdir +"/");
+						let mask = `${dd}.${m}.${y}`;
+						let pdfDir = await isDir(outDir + mask +"/");
 						if(!pdfDir){
-							fs.mkdirSync(outDir + fdir +"/");
-							console.log('Директория создана:'.bold.cyan + " " + (outDir + fdir +"/").bold.yellow);
+							fs.mkdirSync(outDir + mask +"/");
+							console.log('Директория создана:'.bold.cyan + " " + (outDir + mask +"/").bold.yellow);
 						}
 						/**
+						 * Заполнение метатегов документа
+						 * Это обязательное действие.
+						 **
 						 * Заголовок
 						 * Ключевые слова
 						 * Тема (Описание)
 						 */
-						pdfDoc.setTitle(mapsFiles[k].title + " на " + fdir);
-						pdfDoc.setKeywords([mapsFiles[k].title + " на " + fdir]);
-						pdfDoc.setSubject(mapsFiles[k].title + " на " + fdir);
+						pdfDoc.setTitle(mapsFiles[k].title + " на " + mask);
+						pdfDoc.setKeywords([mapsFiles[k].title + " на " + mask]);
+						pdfDoc.setSubject(mapsFiles[k].title + " на " + mask);
 						/**
 						 * Время создания файла
 						 * Время модификации файла
@@ -308,12 +317,14 @@ function pdfGenerator (outDir, imgs) {
 						 * Сохраняем
 						 */
 						let pdfBytes = await pdfDoc.save();
-
-						let pdfFile = `${fdir}${mapsFiles[k].sufix}.pdf`;
+						/**
+						 * Формируем путь и имя файла
+						 */
+						let pdfFile = `${mask}${mapsFiles[k].sufix}.pdf`;
 						/**
 						 * Пишем в файл
 						 */
-						fs.writeFileSync(outDir + fdir +"/" + pdfFile, pdfBytes);
+						fs.writeFileSync(outDir + mask +"/" + pdfFile, pdfBytes);
 						console.log(String('     Запись в файл:').bold.cyan + " " + pdfFile + " УСПЕШНО!".bold.yellow);
 						/**
 						 * Увеличиваем счётчик типов меню
@@ -382,16 +393,14 @@ calendar().then(async function(data){
 	/**
 	 * Тип меню
 	 */
-	//let jsonArg = JSON.stringify(jsonPars);
-	// python = json
-	typemenu(jsonPars).then(async function(data){
+	typemenu(jsonType).then(async function(data){
 
 		typeMenu = parseInt(data);
 		/**
 		 * Выбор директории (диалоговое окно)
 		 */
-		dialog(config).then(async function(direct){
-			dir = path.normalize(direct[0]);
+		dialog().then(async function(direct){
+			dir = path.normalize(direct);
 			dir = dir.replace(/\\/g, '/') + '/';
 
 			let is_dir = await isDir(dir);

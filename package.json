@@ -1,15 +1,17 @@
 {
-	"name": "scan-images-menu2pdf",
-	"version": "2.2.0",
+	"name":        "scan-images-menu2pdf",
+	"version":     "2.2.0",
 	"description": "",
-	"main": "index.js",
+	"main":        "index.js",
 	"scripts": {
-		"test": "node main.js",
-		"build": "minify main.js > index.js",
-		"prod": "node index.js",
-		"pycaleydar": "pyinstaller --icon ./favicon.ico --add-data ../favicon.ico;. --specpath ./test --name calendar --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/calendar/dists modules/calendar/_calendar.py",
-		"pymenu": "pyinstaller --icon ../favicon.ico --add-data ../favicon.ico;. --specpath ./test --name typemenu --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/typemenu/dists modules/typemenu/typemenu.py",
-		"python": "pyinstaller --icon ../favicon.ico --add-data ../favicon.ico;. --specpath ./test --name calendar --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/calendar/dists modules/calendar/_calendar.py && pyinstaller --icon ../favicon.ico --add-data ../favicon.ico;. --specpath ./test --name typemenu --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/typemenu/dists modules/typemenu/typemenu.py"
+		"test":       "node main.js",
+		"prod":       "node index.js",
+		"build_js":   "minify main.js > index.js",
+		"pycalendar": "pyinstaller --icon ./favicon.ico --add-data ./favicon.ico;. --specpath ./modules/calendar --name calendar --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/calendar/dists modules/calendar/_calendar.py",
+		"pymenu":     "pyinstaller --icon ./favicon.ico --add-data ./favicon.ico;. --specpath ./modules/typemenu --name typemenu --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/typemenu/dists modules/typemenu/typemenu.py",
+		"pydialog":   "pyinstaller --icon ./favicon.ico --add-data ./favicon.ico;. --specpath ./modules/opendialog --name opendialog --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/opendialog/dists modules/opendialog/opendialog.py",
+		"python":     "npm run pycalendar && npm run pymenu && npm run pydialog",
+		"build":      "minify main.js > index.js && npm run pycalendar && npm run pymenu && npm run pydialog"
 	},
 	"files": [
 		"index.js",
@@ -17,14 +19,12 @@
 		"menu.json",
 		"modules/**/*"
 	],
-	"author": "ProjectSoft <projectsoft2009@yandex.ru>",
+	"author":  "ProjectSoft <projectsoft2009@yandex.ru>",
 	"license": "MIT",
 	"dependencies": {
-		"colors": "^1.4.0",
+		"colors":          "^1.4.0",
 		"compress-images": "^2.0.5",
-		"gifsicle": "^5.2.1",
-		"node-file-dialog": "^1.0.3",
-		"pngquant-bin": "^6.0.1",
-		"prompt": "^1.3.0"
+		"gifsicle":        "^5.2.1",
+		"pngquant-bin":    "^6.0.1"
 	}
 }

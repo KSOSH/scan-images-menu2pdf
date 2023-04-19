@@ -1,29 +1,28 @@
-try:
-	import tkinter as tk
-	from tkinter import ttk
-except ImportError:
-	import Tkinter as tk
-	import ttk
+"""
+Author: ProjectSoft <projectsoft2009@yandex.ru>
+"""
 
+from tkinter import *
+from tkinter import ttk
 import time
 import sys
+import os
 from tkcalendar import Calendar
-from tkinter import *
 
 if __name__ == '__main__':
-
+	"""
+	Получение директории приложения
+	"""
 	def resource_path(relative_path):
 		try:
 			base_path = sys._MEIPASS
 		except Exception:
 			base_path = os.path.abspath(".")
 		return os.path.join(base_path, relative_path)
-
+	"""
+	Установка окна приложения по центру экрана
+	"""
 	def center(win):
-		"""
-		centers a tkinter window
-		:param win: the main window or Toplevel window to center
-		"""
 		win.update_idletasks()
 		width = win.winfo_width()
 		frm_width = win.winfo_rootx() - win.winfo_x()
@@ -35,20 +34,30 @@ if __name__ == '__main__':
 		y = win.winfo_screenheight() // 2 - win_height // 2
 		win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 		win.deiconify()
-	root = tk.Tk()
+	"""
+	Старт программы
+	"""
+	root = Tk()
 	rp = resource_path('favicon.ico')
 	root.iconbitmap(rp)
 	root.title("Выбор даты начала меню")
-	s = ttk.Style(root)
-	s.theme_use('clam')
-
+	"""
+	Получаем время
+	"""
 	tmr = time.localtime(time.time());
+	"""
+	Функция создания календаря
+	"""
 	def CalendarFn(top):
-		def print_sel():
-			rnn = cal.selection_get()
-			print(rnn)
+		"""
+		Клик по кнопке
+		"""
+		def click_button():
+			index = cal.selection_get()
+			print(index)
 			top.destroy()
-		rnn = "";
+
+		index = "";
 		cal = Calendar(
 			top,
 			font="Arial 14",
@@ -60,17 +69,18 @@ if __name__ == '__main__':
 		)
 		cal.pack(
 			fill="both",
-			expand=True
+			expand=True,
+			pady=(0, 6)
 		)
 		ttk.Button(
 			top,
-			text="ok",
-			command=print_sel
-		).pack()
-		# p1 = PhotoImage(file = 'favicon.png')
-		# Setting icon of master window
-		# root.iconphoto(False, p1)
+			text="Ок",
+			command=click_button
+		).pack(
+			pady=(10, 12)
+		)
 	ccal = CalendarFn(root)
 	root.resizable(0, 0)
 	center(root)
+	root.attributes('-topmost', 1)
 	root.mainloop()
