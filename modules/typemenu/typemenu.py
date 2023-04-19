@@ -12,8 +12,17 @@ parser=argparse.ArgumentParser(
 parser.add_argument('--json', type=str, help='JSON data', default='{}')
 args = parser.parse_args()
 
+def resource_path(relative_path):
+	try:
+		base_path = sys._MEIPASS
+	except Exception:
+		base_path = os.path.abspath(".")
+	return os.path.join(base_path, relative_path)
+
 root = Tk()
 root.title("Выбор типа меню")
+rp = resource_path('favicon.ico')
+root.iconbitmap(rp)
 root.geometry("300x100")
 arg = args.json
 values = []

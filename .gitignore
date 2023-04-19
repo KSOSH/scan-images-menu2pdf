@@ -1,7 +1,5 @@
 # Builds
 build/
-# Tests
-test/
 # Logs
 logs
 *.log

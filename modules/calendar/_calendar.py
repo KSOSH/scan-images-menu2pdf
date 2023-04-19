@@ -6,10 +6,19 @@ except ImportError:
 	import ttk
 
 import time
+import sys
 from tkcalendar import Calendar
 from tkinter import *
 
 if __name__ == '__main__':
+
+	def resource_path(relative_path):
+		try:
+			base_path = sys._MEIPASS
+		except Exception:
+			base_path = os.path.abspath(".")
+		return os.path.join(base_path, relative_path)
+
 	def center(win):
 		"""
 		centers a tkinter window
@@ -27,7 +36,8 @@ if __name__ == '__main__':
 		win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 		win.deiconify()
 	root = tk.Tk()
-
+	rp = resource_path('favicon.ico')
+	root.iconbitmap(rp)
 	root.title("Выбор даты начала меню")
 	s = ttk.Style(root)
 	s.theme_use('clam')
