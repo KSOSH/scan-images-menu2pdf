@@ -9,16 +9,15 @@ function calendar() {
 		 */
 		// Windows exe
 		const bat = exec(path.join(root, 'dists/calendar.exe'), (error, stdout, stderr) => {
-			console.log('Calendar', stdout)
 			if (stdout) {
 				if (!stdout.trim())
-					reject(new Error('Nothing selected date'));
+					reject(`No calendar select`);
 				else
 					resolve(stdout.trim())
 			} else if (error) {
-				reject(new Error('Nothing selected date'));
+				reject(error);
 			} else if (stderr) {
-				reject(new Error('Nothing selected date'));
+				reject(stderr);
 			}
 		});
 		/*

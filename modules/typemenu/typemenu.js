@@ -11,10 +11,9 @@ function typemenu(json) {
 		json = JSON.stringify(json);
 		json = json.replace(/"/gm, `"""`)
 		const bat = exec(path.join(root, `dists/typemenu.exe --json ` + json), (error, stdout, stderr) => {
-			console.log('Menu', stdout)
 			if (stdout) {
 				if (!stdout.trim())
-					reject(new Error('Nothing selected menu'));
+					reject(`No menu select`);
 				else
 					resolve(stdout.trim())
 			} else if (error) {
