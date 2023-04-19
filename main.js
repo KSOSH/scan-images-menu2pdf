@@ -259,9 +259,22 @@ function pdfGenerator (outDir, imgs) {
 						 * Создатель
 						 * Продюсер
 						 */
-						pdfDoc.setAuthor(jsonPars[typeMenu]["creator"]);
-						pdfDoc.setCreator(jsonPars[typeMenu]["creator"]);
-						pdfDoc.setProducer(jsonPars[typeMenu]["creator"]);
+						/**
+						 * Автор документа - откуда получили документ.
+						 * Проще говоря, кто организовывает питание в школе
+						 */
+						pdfDoc.setAuthor(jsonPars[typeMenu]["author"]);
+						/**
+						 * Кто производит документ
+						 */
+						pdfDoc.setProducer(jsonPars[typeMenu]["produser"]);
+						/**
+						 * Приложение, которое создаёт документ.
+						 * Данную строчку по лицензии MIT удалять нельзя ни в коем случае!!!
+						 * Производителем файла должна быть программа, которая является официальной версией!
+						 * Мы сюда так же добавляем ссылку на библиотеку pdf-lib.js
+						 */
+						pdfDoc.setCreator("https://github.com/Hopding/pdf-lib https://github.com/KSOSH/scan-images-menu2pdf");
 						/**
 						 * Формируем имя файла
 						 * Формат: dd-mm-yyyy-sufix.pdf
@@ -328,6 +341,9 @@ function pdfGenerator (outDir, imgs) {
 						i = 0;
 					}
 				}
+				/**
+				 * Открываем проводник к PDF файлам
+				 */
 				openExplorerin(outDir, function(){});
 				resolve(String("\nВсе PDF файлы созданы!\n").bold.yellow);
 			}else{

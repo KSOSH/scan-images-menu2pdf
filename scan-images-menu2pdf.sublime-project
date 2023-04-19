@@ -4,8 +4,7 @@
 		{
 			"path": ".",
 			"name": "Images menu to PDF",
-			"file_include_patterns": ["*.exe"],
-			"index_include_patterns": ["*.exe"]
+			"file_include_patterns": ["*.exe", "*.*"]
 		}
 	]
 }

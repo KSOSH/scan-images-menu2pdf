@@ -12,6 +12,7 @@ node_modules/
 
 # Packages lock
 *-lock.json
+*-copy.json
 
 # Sublime
 *.sublime-workspace
