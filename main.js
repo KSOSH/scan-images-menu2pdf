@@ -6,9 +6,7 @@ const fs = require('fs'),
 	compress_images = require('compress-images'),
 	{ spawn, exec } = require('child_process'),
 	{ PDFDocument } =  require('./modules/pdf-lib/pdf-lib.js'),
-	calendar =  require('./modules/calendar/calendar.js'),
-	typemenu = require('./modules/typemenu/typemenu.js'),
-	dialog = require('./modules/opendialog/opendialog.js'),
+	{ calendar, opendialog, typemenu } =  require('./modules/dialogs/dialogs.js'),
 	json = fs.readFileSync('menu.json'),
 	jsonPars = JSON.parse(json);
 
@@ -16,6 +14,7 @@ let jsonType = [];
 for(let jsn of jsonPars){
 	jsonType.push({"name": jsn["name"]})
 }
+
 
 /**
  * Предупреждение
@@ -394,12 +393,11 @@ calendar().then(async function(data){
 	 * Тип меню
 	 */
 	typemenu(jsonType).then(async function(data){
-
 		typeMenu = parseInt(data);
 		/**
 		 * Выбор директории (диалоговое окно)
 		 */
-		dialog().then(async function(direct){
+		opendialog().then(async function(direct){
 			dir = path.normalize(direct);
 			dir = dir.replace(/\\/g, '/') + '/';
 
@@ -421,6 +419,9 @@ calendar().then(async function(data){
 					if(!is_res_dir){
 						fs.mkdirSync(resize_dir);
 					}
+					/**
+					 * Ресайз изображений
+					 */
 					for(let image of images){
 						let inputFile = `${dir}${image}`,
 							outputFile = `${resize_dir}${image}`;

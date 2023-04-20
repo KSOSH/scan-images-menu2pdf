@@ -7,11 +7,8 @@
 		"test":       "node main.js",
 		"prod":       "node index.js",
 		"build_js":   "minify main.js > index.js",
-		"pycalendar": "pyinstaller --icon ./favicon.ico --add-data ./favicon.ico;. --specpath ./modules/calendar --name calendar --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/calendar/dists modules/calendar/_calendar.py",
-		"pymenu":     "pyinstaller --icon ./favicon.ico --add-data ./favicon.ico;. --specpath ./modules/typemenu --name typemenu --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/typemenu/dists modules/typemenu/typemenu.py",
-		"pydialog":   "pyinstaller --icon ./favicon.ico --add-data ./favicon.ico;. --specpath ./modules/opendialog --name opendialog --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/opendialog/dists modules/opendialog/opendialog.py",
-		"python":     "npm run pycalendar && npm run pymenu && npm run pydialog",
-		"build":      "minify main.js > index.js && npm run pycalendar && npm run pymenu && npm run pydialog"
+		"dialogs":    "pyinstaller --icon ./favicon.ico --add-data ./favicon.ico;. --specpath ./modules/dialogs --name dialogs --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/dialogs/dists modules/dialogs/dialogs.py",
+		"build":      "minify main.js > index.js && npm run dialogs"
 	},
 	"files": [
 		"index.js",
