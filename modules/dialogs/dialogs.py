@@ -15,11 +15,13 @@ from array import array
 parser=argparse.ArgumentParser(
 	description="DIALOGS"
 )
-parser.add_argument('--directory', help="Directory open prompt", action='store_true')
-parser.add_argument('--calendar', help="Calendar open prompt", action='store_true')
 parser.add_argument('--typemenu', type=str, help='Type Menu open prompt JSON', action='store')
 
 args = parser.parse_args()
+
+selection = -1
+directory = "false"
+dataout = ""
 
 if __name__ == '__main__':
 	"""
@@ -47,10 +49,18 @@ if __name__ == '__main__':
 		win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 		win.deiconify()
 
-	"""
-	Open DIrectory
-	"""
-	if args.directory:
+	def getJson():
+		global selection
+		global directory
+		global dataout
+		jsn = {}
+		jsn["typemenu"] = selection
+		jsn["directory"] = directory
+		jsn["data"] = dataout
+		print(json.dumps(jsn))
+
+	def openDirectory():
+		global directory
 		root = Tk()
 		root.withdraw()
 		rp = resource_path('favicon.ico')
@@ -58,13 +68,15 @@ if __name__ == '__main__':
 		root.attributes('-topmost', 1)
 		temp=tkinter.filedialog.askdirectory()
 		if not temp:
-			print("None")
+			directory = "None"
+			getJson()
+			root.destroy()
 		else:
-			print(temp)
-	"""
-	Open Calendar
-	"""
-	if args.calendar:
+			directory = temp
+			getJson()
+			root.destroy()
+
+	def openCalendar():
 		root = Tk()
 		rp = resource_path('favicon.ico')
 		root.iconbitmap(rp)
@@ -77,15 +89,23 @@ if __name__ == '__main__':
 		Функция создания календаря
 		"""
 		def CalendarFn(top):
+			global dataout
+			dataout = "";
+			def on_close():
+				global selection
+				selection = -1
+				getJson()
+				root.destroy()
+			root.protocol("WM_DELETE_WINDOW", on_close)
 			"""
 			Клик по кнопке
 			"""
 			def click_button_calendar():
-				index = cal.selection_get()
-				print(index)
+				global dataout
+				dataout = cal.selection_get().strftime("%Y-%m-%d")
 				top.destroy()
+				openTypeMenu()
 
-			index = "";
 			cal = Calendar(
 				top,
 				font="Arial 14",
@@ -112,73 +132,79 @@ if __name__ == '__main__':
 		center(root)
 		root.attributes('-topmost', 1)
 		root.mainloop()
-		
-	"""
-	Open Type Menu JSON
-	"""
-	if args.typemenu:
+
+	def openTypeMenu():
+		global selection
 		"""
 		Выбор в ComboBox
 		"""
-
-		selection = 0
-		root = Tk()
-		rp = resource_path('favicon.ico')
-		root.iconbitmap(rp)
-		root.title("Выбор типа меню")
-		arg = args.typemenu
-		values = []
 		data = json.loads(args.typemenu)
-		for dt in data:
-			values.append(dt["name"])
+		if len(data):
+			def on_close():
+				global selection
+				selection = -1
+				getJson()
+				root.destroy()
+			root = Tk()
+			rp = resource_path('favicon.ico')
+			root.iconbitmap(rp)
+			root.title("Выбор типа меню")
+			root.protocol("WM_DELETE_WINDOW", on_close)
+			arg = args.typemenu
+			values = []
+			for dt in data:
+				values.append(dt["name"])
+			type_menu = StringVar(value=values[0])
+			selection = 0
+			ttk.Label(
+				text="Выберите тип меню:"
+			).pack(
+				anchor=NW,
+				padx=10,
+				pady=6
+			)
 
-		type_menu = StringVar(value=values[0])
+			def selected(event):
+				global selection
+				selection = combobox.current()
+			"""
+			Клик Кнопки
+			"""
+			def click_button_type():
+				root.destroy()
+				openDirectory()
 
-		ttk.Label(
-			text="Выберите тип меню:"
-		).pack(
-			anchor=NW,
-			padx=10,
-			pady=6
-		)
+			combobox = ttk.Combobox(
+				textvariable=type_menu,
+				values=values,
+				state="readonly",
+				width=50
+			)
+			combobox.pack(
+				anchor=N,
+				padx=10,
+				pady=(0, 6),
+				expand=True
+			)
+			combobox.bind(
+				"<<ComboboxSelected>>",
+				selected
+			)
 
-		def selected(event):
-			global selection
-			selection = combobox.current()
-		"""
-		Клик Кнопки
-		"""
-		def click_button_type():
-			global selection
-			print(selection)
+			ttk.Button(
+				root,
+				text="Ок",
+				command=click_button_type
+			).pack(
+				padx=10,
+				pady=(6, 12)
+			)
+			center(root)
+			root.resizable(0, 0)
+			root.attributes('-topmost', 1)
+			root.mainloop()
+		else:
 			root.destroy()
-
-		combobox = ttk.Combobox(
-			textvariable=type_menu,
-			values=values,
-			state="readonly",
-			width=50
-		)
-		combobox.pack(
-			anchor=N,
-			padx=10,
-			pady=(0, 6),
-			expand=True
-		)
-		combobox.bind(
-			"<<ComboboxSelected>>",
-			selected
-		)
-
-		ttk.Button(
-			root,
-			text="Ок",
-			command=click_button_type
-		).pack(
-			padx=10,
-			pady=(6, 12)
-		)
-		center(root)
-		root.resizable(0, 0)
-		root.attributes('-topmost', 1)
-		root.mainloop()
+			getJson()
+	if args.typemenu:
+		openCalendar()
