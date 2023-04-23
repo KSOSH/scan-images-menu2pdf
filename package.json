@@ -7,7 +7,7 @@
 		"test":       "node main.js",
 		"prod":       "node index.js",
 		"build_js":   "minify main.js > index.js",
-		"dialogs":    "pyinstaller --icon ./favicon.ico --add-data ./favicon.ico;. --specpath ./modules/dialogs --name dialogs --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/dialogs/dist --ascii modules/dialogs/dialogs.py",
+		"dialogs":    "pyinstaller --icon ./favicon.ico --add-data ./favicon.ico;. --specpath ./modules/dialogs --name dialogs --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/dialogs/dist --ascii modules/dialogs/dialogs.py && rmdir build /s /q && del /s /q modules\\dialogs\\*.spec",
 		"build":      "minify main.js > index.js && npm run dialogs"
 	},
 	"files": [
