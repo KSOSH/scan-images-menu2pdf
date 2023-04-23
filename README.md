@@ -111,6 +111,7 @@ $ npm install
 ```Batchfile
 $ npm run prod
 ```
+Или запуск `scan-images-menu2pdf.bat`, или `scan-images-menu2pdf.exe`
 ### Сборка проекта
 ```Batchfile
 $ npm run build
@@ -128,8 +129,6 @@ $ npm run test
 
 ![Выбор папки с изображениями](/assets/screenshots/0003.png?raw=true "Выбор папки с изображениями")
 
-![Старт программы](/assets/screenshots/0004.png?raw=true "Старт программы")
+![Выполнение программы](/assets/screenshots/0004.png?raw=true "Выполнение программы")
 
-![Выполнение программы](/assets/screenshots/0005.png?raw=true "Выполнение программы")
-
-![Дирректория с полученными PDF файлами](/assets/screenshots/0006.png?raw=true "Дирректория с полученными PDF файлами")
+![Дирректория с полученными PDF файлами](/assets/screenshots/0005.png?raw=true "Дирректория с полученными PDF файлами")
