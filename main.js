@@ -181,6 +181,7 @@ function pdfGenerator (outDir, imgs) {
 				// Кол-во файлов в файле PDF
 				// Зависит от типа меню
 				let c = jsonPars[typeMenu]["files"];
+				const format = jsonPars[typeMenu]["format"];
 				let k = 0;
 				// Количество пунктов меню
 				let f = mapsFiles.length;
@@ -271,11 +272,17 @@ function pdfGenerator (outDir, imgs) {
 						let y = date.getFullYear();
 						let dd = d < 10 ? `0${d}` : d;
 						m = m < 10 ? `0${m}` : m;
+						// Имя директории
 						let mask = `${dd}.${m}.${y}`;
-						let pdfDir = await isDir(outDir + mask +"/");
-						if(!pdfDir){
-							fs.mkdirSync(outDir + mask +"/");
-							console.log('Директория создана:'.bold.cyan + " " + (outDir + mask +"/").bold.yellow);
+						// Имя файла
+						let frm = format.replace("%d", dd).replace("%m", m).replace("%y", y);
+						let pdfDir = await isDir(`${outDir}${mask}/`);
+						/**
+						 * Если директория не существует и multidir включен - создаём директорию
+						 */
+						if(!pdfDir && jsonPars[typeMenu]["multidir"]){
+							fs.mkdirSync(`${outDir}${mask}/`);
+							console.log('Директория создана:'.bold.cyan + " " + (`${outDir}${mask}/`).bold.yellow);
 						}
 						/**
 						 * Заполнение метатегов документа
@@ -301,11 +308,17 @@ function pdfGenerator (outDir, imgs) {
 						/**
 						 * Формируем путь и имя файла
 						 */
-						let pdfFile = `${mask}${mapsFiles[k].sufix}.pdf`;
+						let pdfFile = `${frm}${mapsFiles[k].sufix}.pdf`;
 						/**
 						 * Пишем в файл
 						 */
-						fs.writeFileSync(outDir + mask +"/" + pdfFile, pdfBytes);
+						/**
+						 * Если multidir включен, то mask не меняет значение и директория создана
+						 * Иначе оно пустое и файлы сохраняются в pdf директорию
+						 */
+						mask = !jsonPars[typeMenu]["multidir"] ? `` : `${mask}/`;
+						console.log(`${outDir}${mask}${pdfFile}`);
+						fs.writeFileSync(`${outDir}${mask}${pdfFile}`, pdfBytes);
 						console.log(String('     Запись в файл:').bold.cyan + " " + pdfFile + " УСПЕШНО!".bold.yellow);
 						/**
 						 * Увеличиваем счётчик типов меню
