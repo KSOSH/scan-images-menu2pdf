@@ -95,11 +95,13 @@ tkcalendar
 $ pip install tkcalendar
 ```
 ### Дополнительные установки
+Должен быть установлен глобально пакет [**minify**](https://www.npmjs.com/package/minify)
+
 Подключена обработка отсканированных изображений (ресайз) с помощю [**ImageMagick**](https://imagemagick.org/script/download.php) (скачать и установить от имени Администратора, проверить запуск magick)
 
-Обработка оптимизации изображений осуществляется модулем [**compress-images**](https://github.com/semiromid/compress-images)
+Обработка оптимизации изображений осуществляется модулем [**compress-images**](https://github.com/semiromid/compress-images) *(Устанавливается при развёртывании проекта)*
 
-Создание PDF файлов посредством библиотеки [**pdf-lib**](https://pdf-lib.js.org/)
+Создание PDF файлов посредством библиотеки [**pdf-lib**](https://pdf-lib.js.org/) *(Уже добавлен в подключаемые модули проекта)*
 
 ### Установка:
 ```Batchfile
@@ -116,7 +118,6 @@ $ npm run prod
 ```Batchfile
 $ npm run build
 ```
-Должен быть установлен глобально пакет [**minify**](https://www.npmjs.com/package/minify)
 ### Тест проекта
 ```Batchfile
 $ npm run test

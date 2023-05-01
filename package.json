@@ -4,6 +4,7 @@
 	"description": "",
 	"main":        "index.js",
 	"scripts": {
+		"inst":       "npm install --legacy-peer-deps",
 		"test":       "node main.js",
 		"prod":       "node index.js",
 		"build_js":   "minify main.js > index.js",
