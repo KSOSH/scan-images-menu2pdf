@@ -113,12 +113,16 @@ function compress(m, d) {
 			m,
 			// Output directory
 			d + 'png/',
+			// Options
 			{
 				compress_force: true,
 				statistic: false,
 				autoupdate: true
 			},
 			false,
+			/**
+			 * Задаём оптимизацию для JPG и PNG
+			 */
 			{
 				jpg: {
 					engine: "mozjpeg",
@@ -131,6 +135,9 @@ function compress(m, d) {
 					command: ["--quality=20-50", "-o"]
 				}
 			},
+			/**
+			 * SVG и GIF нас не интересует, но пусть будет
+			 */
 			{
 				svg: {
 					engine: "svgo",
@@ -217,7 +224,8 @@ function pdfGenerator (outDir, imgs) {
 					/**
 					 * Масштабируем страницу
 					 * При сканировании страниц в формате 300dpi
-					 * Изображение нужно уменьшить до 27.44%  0.2744
+					 * Изображение нужно уменьшить до ~ 27.44%  (1 - 0.2744)
+					 * Приблизительно выставил 0.7
 					 */
 					let pdfDims = pdfImage.scale(0.7);
 					/**
@@ -400,12 +408,30 @@ dialogs(jsonType).then(async function(data){
 				}
 				/**
 				 * Ресайз изображений
+				 * portrait     - книжная    (1130 x 1600)
+				 * landscape    - альбомная  (1600 x 1130)
+				 * по умолчанию - книжная    (1130 x 1600)
+				 *
+				 * Если надо добавить, то добавляем новые условия.
+				 * Размер страниц PDF строится только от размера полученных изображений.
+				 * Для изображений мы задаём только ширину страницы. Высота изменяется пропорционально.
 				 */
+				let size;
+				switch(jsonPars[typeMenu]["size"]){
+					case 'portrait':
+						size = 1130;
+						break;
+					case 'landscape':
+						size = 1600;
+						break;
+					default:
+						size = 1130;
+				}
 				for(let image of images){
 					let inputFile = `${dir}${image}`,
 						outputFile = `${resize_dir}${image}`;
 					console.log(`Чтение изображения:`.cyan.bold + ` ${inputFile} `);
-					await resize(inputFile, outputFile, jsonPars[typeMenu]["size"]);
+					await resize(inputFile, outputFile, size);
 					console.log(`Ресайз изображения:`.bold.cyan + ` ${outputFile} ` + `УСПЕШНО!`.bold.yellow);
 				}
 				/**
