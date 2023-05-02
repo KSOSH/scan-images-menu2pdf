@@ -19,7 +19,9 @@ let startTime,
 	typeMenu = false,
 	mapsFiles;
 for(let jsn of jsonPars){
-	jsonType.push({"name": jsn["name"]})
+	if(jsn["name"]) {
+		jsonType.push({"name": jsn["name"]});
+	}
 }
 
 function openExplorerin(paths, callback) {
