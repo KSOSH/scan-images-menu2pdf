@@ -1,37 +1,37 @@
 const fs = require('fs'),
-		path = require('path'),
-		colors = require('colors'),
-		compress_images = require('compress-images'),
-		{ spawn, exec } = require('child_process'),
-		{ PDFDocument } =  require('./modules/pdf-lib/pdf-lib.js'),
-		dialogs =  require('./modules/dialogs/dialogs.js'),
-		start = function(){
-			var date;
-			const json = fs.readFileSync('menu.json'),
-				jsonPars = JSON.parse(json),
-				log = function(args) {
-					console.log(args);
-				};
-			let startTime, 
-				endTime,
-				jsonType = [],
-				dir = '',
-				typeMenu = false,
-				mapsFiles;
-			for(let jsn of jsonPars){
-				if(jsn["name"]) {
+	path = require('path'),
+	colors = require('colors'),
+	compress_images = require('compress-images'),
+	{ spawn, exec } = require('child_process'),
+	{ PDFDocument } =  require('./modules/pdf-lib/pdf-lib.js'),
+	dialogs =  require('./modules/dialogs/dialogs.js'),
+	start = function(){
+		var date;
+		const json = fs.readFileSync('menu.json'),
+			jsonPars = JSON.parse(json),
+			log = function(args) {
+				console.log(args);
+			};
+		let startTime, 
+			endTime,
+			jsonType = [],
+			dir = '',
+			typeMenu = false,
+			mapsFiles;
+		for(let jsn of jsonPars){
+			if(jsn["name"]) {
 					jsonType.push({"name": jsn["name"]});
 				}
 			}
 
-			function openExplorerin(paths, callback) {
-				var cmd = ``;
-				switch (require(`os`).platform().toLowerCase().replace(/[0-9]/g, ``).replace(`darwin`, `macos`)) {
-					case `win`:
-						paths = paths || '=';
-						paths = paths.replace(/\//g, `\\`);
-						paths = paths.replace(/\\$/, ``);
-						cmd = `explorer`;
+		const openExplorerin = function(paths, callback) {
+			var cmd = ``;
+			switch (require(`os`).platform().toLowerCase().replace(/[0-9]/g, ``).replace(`darwin`, `macos`)) {
+				case `win`:
+					paths = paths || '=';
+					paths = paths.replace(/\//g, `\\`);
+					paths = paths.replace(/\\$/, ``);
+					cmd = `explorer`;
 						break;
 					case `linux`:
 						paths = paths || '/';
@@ -47,9 +47,9 @@ const fs = require('fs'),
 					p.kill();
 					return callback(err);
 				});
-			}
+			},
 
-			function isDir(dir_read){
+			isDir = function(dir_read){
 				return new Promise(function(resolve, reject){
 					try {
 						let stats = fs.lstatSync(dir_read);
@@ -62,9 +62,9 @@ const fs = require('fs'),
 						resolve(false);
 					}
 				});
-			}
+			},
 
-			function readDirectory(dir_read){
+			readDirectory = function(dir_read){
 				return new Promise(function(resolve, reject) {
 					let files = fs.readdirSync(dir_read).filter(function(fn) {
 							if(fn.endsWith('.jpg') || fn.endsWith('.jpeg') || fn.endsWith('.png') || fn.endsWith('.JPG') || fn.endsWith('.JPEG') || fn.endsWith('.PNG')){
@@ -74,9 +74,9 @@ const fs = require('fs'),
 						});
 					resolve(files);
 				})
-			}
+			},
 
-			function resize(input, output, width) {
+			resize = function(input, output, width) {
 				return new Promise(function(resolve, reject){
 					// magick convert "E:/scans/0001.jpg" -filter Catrom -resize 1134x -quality 100 "E:/scans/resize/0001.jpg"
 					let args = [
@@ -108,9 +108,9 @@ const fs = require('fs'),
 						}
 					});
 				});
-			}
+			},
 
-			function compress(m, d) {
+			compress = function(m, d) {
 				return new Promise(function(resolve, reject){
 					compress_images(
 						// directory and files mask
@@ -166,9 +166,9 @@ const fs = require('fs'),
 						}
 					);
 				})
-			}
+			},
 
-			function pdfGenerator (outDir, imgs) {
+			pdfGenerator = function (outDir, imgs) {
 				return new Promise(async function(resolve, reject){
 					/**
 					 * Если директория для PDF не существует - создать
@@ -370,134 +370,134 @@ const fs = require('fs'),
 						reject(e);
 					}
 				});
-			}
+			};
+		/**
+		 * Запускаем диалоги
+		 */
+		dialogs(jsonType).then(async function(data){
 			/**
-			 * Запускаем диалоги
+			 * Проверить полученные данные
 			 */
-			dialogs(jsonType).then(async function(data){
-				/**
-				 * Проверить полученные данные
-				 */
-				data = JSON.parse(data);
-				if(parseInt(data.typemenu) > -1 && data.directory != "None" && data.data.length) {
-					typeMenu = parseInt(data.typemenu);
-					dir = data.directory + '/';
-					date = new Date(data.data);
-					let day = date.getDay();
-					if(day == 6){
-						day = 2
-					}else if(day == 0){
-						day = 1;
-					}else{
-						day = 0
-					}
-					date.setDate(date.getDate() + day);
-					let is_dir = await isDir(dir);
-					if(is_dir) {
+			data = JSON.parse(data);
+			if(parseInt(data.typemenu) > -1 && data.directory != "None" && data.data.length) {
+				typeMenu = parseInt(data.typemenu);
+				dir = data.directory + '/';
+				date = new Date(data.data);
+				let day = date.getDay();
+				if(day == 6){
+					day = 2
+				}else if(day == 0){
+					day = 1;
+				}else{
+					day = 0
+				}
+				date.setDate(date.getDate() + day);
+				let is_dir = await isDir(dir);
+				if(is_dir) {
+					/**
+					 * Ресайз изображения
+					 * Каждодневное меню width = 1134
+					 * Десятидневное меню width = 1604
+					 */
+					readDirectory(dir).then(async function(images){
+						startTime = new Date().getTime();
+						if(await isDir(`${dir}pdf`)){
+							log("Удаляем директорию с PDF файлами".bold.yellow);
+							fs.rmSync(`${dir}pdf`, { recursive: true, force: true });
+						}
+						let resize_dir = `${dir}resize/`,
+							is_res_dir = await isDir(resize_dir);
+						if(!is_res_dir){
+							fs.mkdirSync(resize_dir);
+						}
 						/**
-						 * Ресайз изображения
-						 * Каждодневное меню width = 1134
-						 * Десятидневное меню width = 1604
+						 * Ресайз изображений
+						 * portrait     - книжная    (1130 x 1600)
+						 * landscape    - альбомная  (1600 x 1130)
+						 * по умолчанию - книжная    (1130 x 1600)
+						 *
+						 * Если надо добавить, то добавляем новые условия.
+						 * Размер страниц PDF строится только от размера полученных изображений.
+						 * Для изображений мы задаём только ширину страницы. Высота изменяется пропорционально.
 						 */
-						readDirectory(dir).then(async function(images){
-							startTime = new Date().getTime();
-							if(await isDir(`${dir}pdf`)){
-								log("Удаляем директорию с PDF файлами".bold.yellow);
-								fs.rmSync(`${dir}pdf`, { recursive: true, force: true });
-							}
-							let resize_dir = `${dir}resize/`,
-								is_res_dir = await isDir(resize_dir);
-							if(!is_res_dir){
-								fs.mkdirSync(resize_dir);
-							}
+						let size;
+						switch(jsonPars[typeMenu]["size"]){
+							case 'portrait':
+								size = 1130;
+								break;
+							case 'landscape':
+								size = 1600;
+								break;
+							default:
+								size = 1130;
+						}
+						for(let image of images){
+							let inputFile = `${dir}${image}`,
+								outputFile = `${resize_dir}${image}`;
+							log(`Чтение изображения:`.cyan.bold + ` ${inputFile} `);
+							await resize(inputFile, outputFile, size);
+							log(`Ресайз изображения:`.bold.cyan + ` ${outputFile} ` + `УСПЕШНО!`.bold.yellow);
+						}
+						/**
+						 * Оптимизация изображений
+						 */
+						const mask = `${dir}resize/*.{jpg,png,jpeg,JPG,PNG,JPEG}`;
+						log("Старт оптимизации изображений...".bold.yellow);
+						compress(mask, dir).then(function(res){
+							log("Все изображения оптимизированы!".bold.yellow);
+							let outPdf = dir + "pdf/",
+								imgs = dir + "png/";
 							/**
-							 * Ресайз изображений
-							 * portrait     - книжная    (1130 x 1600)
-							 * landscape    - альбомная  (1600 x 1130)
-							 * по умолчанию - книжная    (1130 x 1600)
-							 *
-							 * Если надо добавить, то добавляем новые условия.
-							 * Размер страниц PDF строится только от размера полученных изображений.
-							 * Для изображений мы задаём только ширину страницы. Высота изменяется пропорционально.
+							 * Генерация PDF файлов
 							 */
-							let size;
-							switch(jsonPars[typeMenu]["size"]){
-								case 'portrait':
-									size = 1130;
-									break;
-								case 'landscape':
-									size = 1600;
-									break;
-								default:
-									size = 1130;
-							}
-							for(let image of images){
-								let inputFile = `${dir}${image}`,
-									outputFile = `${resize_dir}${image}`;
-								log(`Чтение изображения:`.cyan.bold + ` ${inputFile} `);
-								await resize(inputFile, outputFile, size);
-								log(`Ресайз изображения:`.bold.cyan + ` ${outputFile} ` + `УСПЕШНО!`.bold.yellow);
-							}
-							/**
-							 * Оптимизация изображений
-							 */
-							const mask = `${dir}resize/*.{jpg,png,jpeg,JPG,PNG,JPEG}`;
-							log("Старт оптимизации изображений...".bold.yellow);
-							compress(mask, dir).then(function(res){
-								log("Все изображения оптимизированы!".bold.yellow);
-								let outPdf = dir + "pdf/",
-									imgs = dir + "png/";
-								/**
-								 * Генерация PDF файлов
-								 */
-								pdfGenerator(outPdf, imgs).then(function(str){
-									// clear
-									log(str);
-									log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
-									fs.rmSync(`${dir}resize`, { recursive: true, force: true });
-									fs.rmSync(`${dir}png`, { recursive: true, force: true });
-									endTime = new Date().getTime();
-									let time = endTime - startTime;
-									time = parseFloat(time / 1000).toFixed(2);
-									log(" ");
-									log("Затраченное время в секундах:".bold.yellow + ' ' + time + "s");
-									log(" ");
-								}).catch(function(err){
-									log("Ошибка при генерации PDF!".bold.red);
-									log(err);
-									// clear
-									fs.rmSync(`${dir}resize`, { recursive: true, force: true });
-									fs.rmSync(`${dir}png`, { recursive: true, force: true });
-									log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
-									log(" ");
-								})
-							}).catch(function(err){
-								log("Ошибка оптимизации изображений!".bold.red);
-								log(err);
+							pdfGenerator(outPdf, imgs).then(function(str){
 								// clear
+								log(str);
 								log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
 								fs.rmSync(`${dir}resize`, { recursive: true, force: true });
 								fs.rmSync(`${dir}png`, { recursive: true, force: true });
+								endTime = new Date().getTime();
+								let time = endTime - startTime;
+								time = parseFloat(time / 1000).toFixed(2);
 								log(" ");
-							});
+								log("Затраченное время в секундах:".bold.yellow + ' ' + time + "s");
+								log(" ");
+							}).catch(function(err){
+								log("Ошибка при генерации PDF!".bold.red);
+								log(err);
+								// clear
+								fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+								fs.rmSync(`${dir}png`, { recursive: true, force: true });
+								log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
+								log(" ");
+							})
 						}).catch(function(err){
-							log(`Ошибка!: ${dir}`.bold.red);
+							log("Ошибка оптимизации изображений!".bold.red);
 							log(err);
 							// clear
 							log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
 							fs.rmSync(`${dir}resize`, { recursive: true, force: true });
 							fs.rmSync(`${dir}png`, { recursive: true, force: true });
 							log(" ");
-						})
-					}
-				}else{
-					log("Завершено пользователем".bold.yellow)
+						});
+					}).catch(function(err){
+						log(`Ошибка!: ${dir}`.bold.red);
+						log(err);
+						// clear
+						log("Удаление директорий с оптимизированными изображениями...".bold.yellow);
+						fs.rmSync(`${dir}resize`, { recursive: true, force: true });
+						fs.rmSync(`${dir}png`, { recursive: true, force: true });
+						log(" ");
+					})
 				}
-			}).catch((error) => {
-				log(`Ошибка!`.bold.red);
-				log(error);
-				log(" ");
-			})
-		}
+			}else{
+				log("Завершено пользователем".bold.yellow)
+			}
+		}).catch((error) => {
+			log(`Ошибка!`.bold.red);
+			log(error);
+			log(" ");
+		});
+	}
 
 start();
