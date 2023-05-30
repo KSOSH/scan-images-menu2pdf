@@ -9,7 +9,7 @@ log/
 node_modules/
 
 # Packages lock
-*-lock.json
+# *-lock.json
 
 # Sublime
 *.sublime-workspace
