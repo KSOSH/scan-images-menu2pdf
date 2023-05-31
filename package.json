@@ -4,12 +4,13 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"inst": "npm install --legacy-peer-deps",
+		"inst": "npm install --legacy-peer-deps && npm install -g minify",
 		"test": "node main.js",
 		"prod": "node index.js",
+		"build_start": "csc /win32icon:favicon.ico start.cs",
 		"build_js": "minify main.js > index.js",
-		"dialogs": "pyinstaller --icon ./favicon.ico --add-data ./favicon.ico;. --specpath ./modules/dialogs --name dialogs --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/dialogs/dist --ascii modules/dialogs/dialogs.py && rmdir build /s /q && del /s /q modules\\dialogs\\*.spec",
-		"build": "minify main.js > index.js && npm run dialogs"
+		"build_dialog": "pyinstaller --icon ./favicon.ico --add-data ./favicon.ico;. --specpath ./modules/dialogs --name dialogs --hidden-import babel.numbers --onefile --console --clean --distpath ./modules/dialogs/dist --ascii modules/dialogs/dialogs.py && rmdir build /s /q && del /s /q modules\\dialogs\\*.spec",
+		"build": "npm run build_js && npm run build_dialog && npm run build_start && echo COMPILE SUCCESS!!!"
 	},
 	"files": [
 		"index.js",
@@ -23,7 +24,6 @@
 		"colors": "^1.4.0",
 		"compress-images": "^2.0.5",
 		"gifsicle": "^5.2.1",
-		"minify": "^10.2.0",
 		"pngquant-bin": "^6.0.1"
 	}
 }

@@ -154,10 +154,10 @@ const fs = require('fs'),
 								command: ["--colors", "64", "--use-col=web"]
 							}
 						},
-						function(err, completed, static){
-								log(`Чтение изображения:`.cyan.bold + ` ${static.input} `);
+						function(err, completed, stat){
+								log(`Чтение изображения:`.cyan.bold + ` ${stat.input} `);
 							if(!err){
-								log(`Сжатие изображения:`.bold.cyan + ` ${static.path_out_new} ` + `УСПЕШНО!`.bold.yellow);
+								log(`Сжатие изображения:`.bold.cyan + ` ${stat.path_out_new} ` + `УСПЕШНО!`.bold.yellow);
 								if(completed)
 									resolve(completed)
 							}else{
